@@ -24,7 +24,7 @@
 ## ✨ Características principales
 
 ### 🧮 Solver interactivo
-- **5 métodos numéricos** implementados: Bisección, Regla Falsa, Newton-Raphson, Secante y Punto Fijo
+- **Métodos numéricos** implementados: Bisección, Regla Falsa, Newton-Raphson, Secante y Punto Fijo
 - Tabla de iteraciones paso a paso con convergencia visual
 - Gráfico interactivo de f(x) con la raíz marcada (Recharts)
 - Detección automática de raíces múltiples en el dominio
@@ -37,7 +37,7 @@
 - **Gráfico de barras de cantidad de iteraciones** por método
 - Colores únicos por método e indicador especial para métodos con error
 
-### 🤖 Inteligencia Artificial integrada
+### 🤖 Inteligencia Artificial integrada (En Desarrollo)
 - **Explicaciones automáticas:** Después de cada cálculo, la IA analiza el resultado y genera una explicación didáctica en español
 - **IKA** (Asistente contextual): Chat persistente con IA que conoce en qué página estás, qué método usás y qué resultados obtuviste
 - Historial de conversación almacenado en base de datos por usuario
