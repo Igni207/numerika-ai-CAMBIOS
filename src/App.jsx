@@ -23,6 +23,7 @@ import "./styles/comparison.css";
 import "./styles/footer.css";
 import "./styles/auth.css";
 import "./styles/ika.css";
+import "./styles/friendly-errors.css";
 
 export default function NumerikaApp() {
   const { loading } = useAuth();

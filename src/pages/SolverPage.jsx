@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { METHODS, METHOD_GUIDE } from "../constants/data";
 import { MethodTypeTag } from "../components/MethodTypeTag";
+import { FriendlyErrorBox } from "../components/FriendlyErrorBox";
 import { useIka } from "../context/IkaContext";
 import {
   biseccion,
@@ -396,9 +397,7 @@ export const SolverPage = () => {
             </button>
 
             {error && (
-              <div style={{ marginTop: "12px", padding: "10px 13px", background: "rgba(255,200,200,0.2)", border: "1px solid rgba(255,100,100,0.5)", borderRadius: "6px", color: "#c41e3a", fontSize: "10px", lineHeight: "1.6" }}>
-                ⚠ {error}
-              </div>
+              <FriendlyErrorBox errorMsg={error} />
             )}
           </div>
         </div>

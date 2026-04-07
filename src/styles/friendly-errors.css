@@ -1,0 +1,181 @@
+/* ─── FriendlyErrorBox ── Mensajes amigables de error/warning ─────────────── */
+
+/* === Full-size version (SolverPage) === */
+.friendly-error-box {
+  margin-top: 12px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1px solid;
+  animation: fadeSlideIn 0.35s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.friendly-error-box.warning {
+  background: rgba(255, 180, 50, 0.08);
+  border-color: rgba(255, 165, 0, 0.35);
+}
+
+.friendly-error-box.error {
+  background: rgba(255, 100, 100, 0.08);
+  border-color: rgba(255, 100, 100, 0.35);
+}
+
+.friendly-error-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.friendly-error-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.friendly-error-box.warning .friendly-error-icon {
+  color: #e6a200;
+}
+
+.friendly-error-box.error .friendly-error-icon {
+  color: #c41e3a;
+}
+
+.friendly-error-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.friendly-error-box.warning .friendly-error-title {
+  color: #c98900;
+}
+
+.friendly-error-box.error .friendly-error-title {
+  color: #c41e3a;
+}
+
+.friendly-error-message {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--foreground);
+  margin: 0 0 10px 0;
+  opacity: 0.9;
+}
+
+.friendly-error-tip {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 12px 0;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border-left: 3px solid rgba(108, 189, 181, 0.4);
+}
+
+.friendly-error-tip strong {
+  color: var(--teal);
+}
+
+.friendly-error-detail-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  font-family: inherit;
+}
+
+.friendly-error-detail-toggle:hover {
+  color: var(--foreground);
+}
+
+.friendly-error-detail-arrow {
+  font-size: 9px;
+  transition: transform 0.2s;
+}
+
+.friendly-error-technical {
+  display: block;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 6px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10.5px;
+  line-height: 1.5;
+  color: var(--muted);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  word-break: break-word;
+}
+
+/* === Compact version (ComparisonPage table) === */
+.friendly-error-compact {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin: 6px 0;
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.friendly-error-compact.warning {
+  background: rgba(255, 180, 50, 0.06);
+  border-color: rgba(255, 165, 0, 0.25);
+}
+
+.friendly-error-compact.error {
+  background: rgba(255, 100, 100, 0.06);
+  border-color: rgba(255, 100, 100, 0.25);
+}
+
+.friendly-error-compact-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.friendly-error-compact.warning .friendly-error-compact-icon {
+  color: #e6a200;
+}
+
+.friendly-error-compact.error .friendly-error-compact-icon {
+  color: #c41e3a;
+}
+
+.friendly-error-compact-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendly-error-compact-text {
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--foreground);
+  margin: 0 0 4px 0;
+  opacity: 0.85;
+}
+
+.friendly-error-detail-toggle.compact {
+  font-size: 9.5px;
+  padding: 2px 0;
+}
+
+.friendly-error-technical.compact {
+  margin-top: 6px;
+  padding: 6px 10px;
+  font-size: 9.5px;
+}
