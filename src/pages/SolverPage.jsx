@@ -1,9 +1,12 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { METHODS, METHOD_GUIDE } from "../constants/data";
 import { MethodTypeTag } from "../components/MethodTypeTag";
+import { MethodTooltip } from "../components/MethodTooltip";
 import { FriendlyErrorBox } from "../components/FriendlyErrorBox";
 import { useIka } from "../context/IkaContext";
+import { analyzeConvergence } from "../utils/convergenceAnalyzer";
+import { calculateZoomedRange, getDefaultCenter } from "../utils/graphUtils";
 import {
   biseccion,
   reglaFalsa,
@@ -24,21 +27,26 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// ─── Tooltip del gráfico ──────────────────────────────────────────────────────
-const CustomTooltip = ({ active, payload }) => {
+// ─── Tooltip del gráfico (mejorado con indicador de cercanía a raíz) ─────────
+const CustomTooltip = ({ active, payload, rootValue }) => {
   if (!active || !payload?.length) return null;
   const { x, y } = payload[0].payload;
+  const nearRoot = rootValue !== null && Math.abs(parseFloat(x) - rootValue) < 0.15;
   return (
-    <div style={{
-      background: "var(--surface)",
-      border: "1px solid var(--border)",
-      borderRadius: 6,
-      padding: "6px 12px",
-      fontSize: 11,
-      fontFamily: "'DM Mono', monospace",
-    }}>
-      <span style={{ color: "var(--muted)" }}>x = {x}{"  "}</span>
-      <span style={{ color: "var(--teal)" }}>f(x) = {y}</span>
+    <div className="graph-tooltip">
+      <div className="graph-tooltip-row">
+        <span className="graph-tooltip-label">x =</span>
+        <span className="graph-tooltip-value">{parseFloat(x).toFixed(4)}</span>
+      </div>
+      <div className="graph-tooltip-row">
+        <span className="graph-tooltip-label">f(x) =</span>
+        <span className="graph-tooltip-value">{y !== null ? parseFloat(y).toFixed(6) : "∞"}</span>
+      </div>
+      {nearRoot && (
+        <div className="graph-tooltip-row highlight">
+          <span className="graph-tooltip-label">⭐ Cerca de la raíz</span>
+        </div>
+      )}
     </div>
   );
 };
@@ -115,6 +123,24 @@ export const SolverPage = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // ── Fase 1: Zoom del gráfico ──
+  const [zoomLevel, setZoomLevel] = useState(1);
+
+  // ── Fase 3: Iteración seleccionada en la tabla ──
+  const [selectedIter, setSelectedIter] = useState(null);
+
+  const handleZoomIn = useCallback(() => {
+    setZoomLevel((z) => Math.min(z * 1.4, 5));
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    setZoomLevel((z) => Math.max(z / 1.4, 0.3));
+  }, []);
+
+  const handleZoomReset = useCallback(() => {
+    setZoomLevel(1);
+  }, []);
 
   // ── Contexto de la Asistente IKA ──
   const { updateContext } = useIka();
@@ -194,6 +220,8 @@ export const SolverPage = () => {
     setScanMin("");
     setScanMax("");
     setShowScanRange(false);
+    setZoomLevel(1);
+    setSelectedIter(null);
   };
 
   const handleCalculate = () => {
@@ -258,7 +286,8 @@ export const SolverPage = () => {
     }
   };
 
-  const graphPoints = useMemo(() => {
+  // ── Rango base del gráfico ──
+  const baseRange = useMemo(() => {
     let xMin = -5, xMax = 5;
     if (selected?.type === "cerrado") {
       const a = parseFloat(aValue), b = parseFloat(bValue);
@@ -272,10 +301,29 @@ export const SolverPage = () => {
       const uMin = parseFloat(scanMin), uMax = parseFloat(scanMax);
       if (isFinite(uMin) && isFinite(uMax) && uMin < uMax) { xMin = uMin; xMax = uMax; }
     }
-    return getFunctionPoints(funcExpr, xMin, xMax);
-  }, [funcExpr, aValue, bValue, x0Value, scanMin, scanMax, selected?.type]);
+    return { xMin, xMax };
+  }, [aValue, bValue, x0Value, scanMin, scanMax, selected?.type]);
 
   const rootForLine = result?.root ? parseFloat(result.root.toFixed(4)) : null;
+
+  // ── Aplica zoom al rango y genera puntos ──
+  const graphPoints = useMemo(() => {
+    const center = getDefaultCenter(baseRange.xMin, baseRange.xMax, rootForLine);
+    const { min, max } = calculateZoomedRange(baseRange.xMin, baseRange.xMax, zoomLevel, center);
+    return getFunctionPoints(funcExpr, min, max, 300);
+  }, [funcExpr, baseRange, zoomLevel, rootForLine]);
+
+  const currentXMin = graphPoints.length > 0 ? graphPoints[0].x : baseRange.xMin;
+  const currentXMax = graphPoints.length > 0 ? graphPoints[graphPoints.length - 1].x : baseRange.xMax;
+
+  // ── Punto de la iteración seleccionada (Fase 3) ──
+  const selectedIterX = useMemo(() => {
+    if (selectedIter === null || !result?.iterations?.[selectedIter]) return null;
+    const row = result.iterations[selectedIter];
+    // Según el método, el "punto aproximado" está en distintas columnas
+    const val = row.c ?? row.x1 ?? row.x2 ?? row.gx ?? row.x;
+    return val !== undefined ? parseFloat(Number(val).toFixed(4)) : null;
+  }, [selectedIter, result]);
 
   return (
     <div className="solver fade-up">
@@ -286,17 +334,18 @@ export const SolverPage = () => {
         <h2 className="page-title">Calculá <em>paso a paso</em></h2>
       </div>
 
-      {/* ── Tabs de métodos ── */}
+      {/* ── Tabs de métodos (con tooltips de documentación) ── */}
       <div className="method-tabs">
         {METHODS.map((m) => (
-          <button
-            key={m.id}
-            className={`method-tab${activeMethod === m.id ? " active" : ""}`}
-            onClick={() => handleMethodChange(m.id)}
-          >
-            <span className="tab-name">{m.name}</span>
-            <span className="tab-type">{m.type}</span>
-          </button>
+          <MethodTooltip key={m.id} methodId={m.id}>
+            <button
+              className={`method-tab${activeMethod === m.id ? " active" : ""}`}
+              onClick={() => handleMethodChange(m.id)}
+            >
+              <span className="tab-name">{m.name}</span>
+              <span className="tab-type">{m.type}</span>
+            </button>
+          </MethodTooltip>
         ))}
       </div>
 
@@ -435,22 +484,60 @@ export const SolverPage = () => {
                   </span>
                 </div>
 
-                <div className="graph-area">
-                  <span className="graph-label">f(x) = {funcExpr}</span>
-                  {result.converged && rootForLine && (
-                    <span className="graph-root-label">Raíz ≈ {result.root}</span>
-                  )}
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={graphPoints} margin={{ top: 28, right: 16, left: -20, bottom: 4 }}>
+                {/* ── Gráfico mejorado con zoom y controles ── */}
+                <div className="graph-container">
+                  <div className="graph-header">
+                    <span className="graph-label">f(x) = {funcExpr}</span>
+                    <div className="graph-controls">
+                      {result.converged && rootForLine && (
+                        <span className="graph-root-badge">Raíz ≈ {result.root}</span>
+                      )}
+                      <button className="zoom-btn" onClick={handleZoomOut} type="button" title="Alejar">−</button>
+                      <button className="zoom-btn" onClick={handleZoomReset} type="button" title="Resetear zoom">{zoomLevel === 1 ? "1x" : `${zoomLevel.toFixed(1)}x`}</button>
+                      <button className="zoom-btn" onClick={handleZoomIn} type="button" title="Acercar">+</button>
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <LineChart data={graphPoints} margin={{ top: 16, right: 30, left: 10, bottom: 20 }}>
                       <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
-                      <XAxis dataKey="x" tick={{ fontSize: 9, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }} interval="preserveStartEnd" />
-                      <YAxis tick={{ fontSize: 9, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }} />
-                      <Tooltip content={<CustomTooltip />} />
-                      <ReferenceLine y={0} stroke="var(--muted)" strokeWidth={1} />
-                      {rootForLine && <ReferenceLine x={rootForLine} stroke="var(--teal)" strokeDasharray="5 3" strokeWidth={1.5} />}
-                      <Line type="monotone" dataKey="y" stroke="var(--teal)" strokeWidth={2} dot={false} connectNulls={false} />
+                      <XAxis
+                        dataKey="x"
+                        tick={{ fontSize: 10, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }}
+                        interval="preserveStartEnd"
+                        label={{ value: "x", position: "insideBottomRight", offset: -5, fontSize: 11, fill: "var(--muted)" }}
+                      />
+                      <YAxis
+                        tick={{ fontSize: 10, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }}
+                        label={{ value: "f(x)", angle: -90, position: "insideLeft", offset: 10, fontSize: 11, fill: "var(--muted)" }}
+                      />
+                      <Tooltip content={<CustomTooltip rootValue={rootForLine} />} />
+                      <ReferenceLine y={0} stroke="var(--muted)" strokeWidth={1.2} />
+                      {rootForLine && (
+                        <ReferenceLine
+                          x={rootForLine}
+                          stroke="var(--teal)"
+                          strokeDasharray="6 3"
+                          strokeWidth={2}
+                          label={{ value: `x=${rootForLine}`, position: "top", fill: "var(--teal)", fontSize: 9, fontFamily: "'DM Mono', monospace" }}
+                        />
+                      )}
+                      {/* Fase 3: Línea de la iteración seleccionada */}
+                      {selectedIterX !== null && (
+                        <ReferenceLine
+                          x={selectedIterX}
+                          stroke="#f59e42"
+                          strokeDasharray="4 3"
+                          strokeWidth={2}
+                          label={{ value: `Iter ${selectedIter + 1}`, position: "top", fill: "#f59e42", fontSize: 9 }}
+                        />
+                      )}
+                      <Line type="monotone" dataKey="y" stroke="var(--teal)" strokeWidth={2} dot={false} connectNulls={false} isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
+                  <div className="graph-footer">
+                    <span className="graph-range-label">Rango X: [{currentXMin}, {currentXMax}]</span>
+                    <span className="graph-range-label">Zoom: {zoomLevel.toFixed(1)}x</span>
+                  </div>
                 </div>
 
                 <div className="table-wrap">
@@ -465,7 +552,12 @@ export const SolverPage = () => {
                     </thead>
                     <tbody>
                       {result.iterations.map((row, idx) => (
-                        <tr key={idx} className={row.converged ? "converged" : ""}>
+                        <tr
+                          key={idx}
+                          className={`${row.converged ? "converged" : ""}${selectedIter === idx ? " selected" : ""}`}
+                          onClick={() => setSelectedIter(selectedIter === idx ? null : idx)}
+                          title="Click para marcar esta iteración en el gráfico"
+                        >
                           {(activeMethod === "biseccion" || activeMethod === "reglafalsa") && <><td>{row.n}</td><td>{row.a}</td><td>{row.b}</td><td>{row.c}</td><td>{row.fc}</td><td>{row.err !== null ? `${row.err}%` : "—"}</td></>}
                           {activeMethod === "newton" && <><td>{row.n}</td><td>{row.x}</td><td>{row.fx}</td><td>{row.fpx}</td><td>{row.x1}</td><td>{row.err}%</td></>}
                           {activeMethod === "secante" && <><td>{row.n}</td><td>{row.x0}</td><td>{row.x1}</td><td>{row.x2}</td><td>{row.fx2}</td><td>{row.err}%</td></>}
@@ -476,10 +568,38 @@ export const SolverPage = () => {
                   </table>
                 </div>
 
+                {/* ── Análisis de convergencia (local, sin IA) ── */}
+                {(() => {
+                  const convergenceInfo = analyzeConvergence(result, activeMethod, {
+                    a: aValue, b: bValue, x0: x0Value, x1: x1Value, tolerance,
+                  });
+                  return (
+                    <div className="convergence-box">
+                      <div className="convergence-header">
+                        <span className="convergence-icon">{result.converged ? "✓" : "⚠"}</span>
+                        <span className="convergence-title">
+                          {result.converged ? "Análisis de Convergencia" : "Análisis de No Convergencia"}
+                        </span>
+                      </div>
+                      <p className="convergence-text">{convergenceInfo.explanation}</p>
+                      {result.converged && (
+                        <div className="convergence-next">
+                          <span className="convergence-next-label">🎯 Próximos pasos:</span>
+                          <ul className="convergence-next-list">
+                            <li>Reducí la tolerancia si necesitás mayor precisión</li>
+                            <li>Compará con otros métodos en la sección "Comparar"</li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                {/* ── IA Insight ── */}
                 <div className="ai-insight">
                   <div className="ai-label">
                     <span className="ai-label-icon">✦</span>
-                    {aiLoading ? "NumérikaAI analizando..." : (result.converged ? "✓ Convergencia alcanzada" : "⚠ No convergió")}
+                    {aiLoading ? "NumérikaAI analizando..." : "Explicación IA"}
                   </div>
 
                   {aiLoading ? (
@@ -491,41 +611,34 @@ export const SolverPage = () => {
                   ) : aiExplanation ? (
                     <p className="ai-text">{aiExplanation}</p>
                   ) : (
-                    <p className="ai-text">
+                    <p className="ai-text" style={{ fontStyle: "italic" }}>
                       {aiError
-                        ? `${result.converged
-                          ? `El método ${selected.name} convergió en ${result.totalIter} iteración${result.totalIter !== 1 ? "es" : ""} a la raíz x = ${result.root}.`
-                          : `El método alcanzó el máximo de iteraciones (${result.totalIter}) sin converger.`
-                        } (IA no disponible: ${aiError})`
-                        : (result.converged
-                          ? `El método ${selected.name} convergió en ${result.totalIter} iteración${result.totalIter !== 1 ? "es" : ""} a la raíz x = ${result.root}. La tolerancia fue satisfecha.`
-                          : `El método alcanzó el máximo de iteraciones (${result.totalIter}) sin converger. Intentá ajustar los parámetros.`
-                        )
-                      }
+                        ? `IA no disponible: ${aiError}`
+                        : "Esperando respuesta de la IA..."}
                     </p>
                   )}
-
-                  {result.converged && result.rootsInfo?.count > 1 && (
-                    <div className="multi-root-alert">
-                      <p className="multi-root-title">⚠ Raíces múltiples detectadas</p>
-                      <p className="multi-root-body">
-                        El análisis del dominio{" "}
-                        <span className="multi-root-range">
-                          [{result.scanRange?.xMin?.toFixed(1)}, {result.scanRange?.xMax?.toFixed(1)}]
-                        </span>{" "}
-                        sugiere <strong>{result.rootsInfo.count} posibles raíces</strong>.
-                        Solo se encontró la más cercana al punto inicial. Cambiá tu{" "}
-                        {selected?.type === "cerrado" ? "intervalo [a, b]" : "x₀"}{" "}
-                        para explorar las demás.
-                      </p>
-                      <div className="chips-row">
-                        {result.rootsInfo.intervals.map((iv, i) => (
-                          <span key={i} className="root-chip">[{iv.a}, {iv.b}]</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
+
+                {result.converged && result.rootsInfo?.count > 1 && (
+                  <div className="multi-root-alert">
+                    <p className="multi-root-title">⚠ Raíces múltiples detectadas</p>
+                    <p className="multi-root-body">
+                      El análisis del dominio{" "}
+                      <span className="multi-root-range">
+                        [{result.scanRange?.xMin?.toFixed(1)}, {result.scanRange?.xMax?.toFixed(1)}]
+                      </span>{" "}
+                      sugiere <strong>{result.rootsInfo.count} posibles raíces</strong>.
+                      Solo se encontró la más cercana al punto inicial. Cambiá tu{" "}
+                      {selected?.type === "cerrado" ? "intervalo [a, b]" : "x₀"}{" "}
+                      para explorar las demás.
+                    </p>
+                    <div className="chips-row">
+                      {result.rootsInfo.intervals.map((iv, i) => (
+                        <span key={i} className="root-chip">[{iv.a}, {iv.b}]</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
               </div>
             )}

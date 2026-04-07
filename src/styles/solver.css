@@ -292,32 +292,39 @@ small {
   text-transform: uppercase;
 }
 
-/* ─── Gráfico ────────────────────────────────────────────────────────────────── */
-.graph-area {
+/* ─── Gráfico mejorado ───────────────────────────────────────────────────────── */
+.graph-container {
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: 10px;
-  height: 340px;
-  position: relative;
-  overflow: hidden;
   margin-bottom: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.graph-label {
-  position: absolute;
-  font-size: 9px;
+.graph-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  gap: 10px;
+}
+
+.graph-header .graph-label {
+  position: static;
+  font-size: 10px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--muted);
-  top: 12px;
-  left: 14px;
-  z-index: 1;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.graph-label::before {
+.graph-header .graph-label::before {
   content: '';
   display: inline-block;
   width: 18px;
@@ -326,16 +333,96 @@ small {
   border-radius: 2px;
 }
 
-.graph-root-label {
-  position: absolute;
+.graph-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.graph-root-badge {
   font-size: 9px;
-  letter-spacing: 1.5px;
+  letter-spacing: 1px;
   text-transform: uppercase;
   color: var(--teal);
-  top: 12px;
-  right: 14px;
-  z-index: 1;
+  padding: 3px 10px;
+  border: 1px solid rgba(108, 189, 181, 0.35);
+  border-radius: 20px;
+  background: rgba(108, 189, 181, 0.08);
   font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+}
+
+.zoom-btn {
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.zoom-btn:hover {
+  border-color: var(--teal);
+  color: var(--teal);
+  background: rgba(108, 189, 181, 0.05);
+}
+
+.zoom-btn:active {
+  background: rgba(108, 189, 181, 0.12);
+}
+
+.graph-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.graph-range-label {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ─── Tooltip del gráfico ────────────────────────────────────────────────────── */
+.graph-tooltip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'DM Mono', monospace;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.graph-tooltip-row {
+  display: flex;
+  gap: 8px;
+  font-size: 11px;
+  margin: 2px 0;
+}
+
+.graph-tooltip-row.highlight {
+  color: var(--teal);
+  font-weight: 500;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.graph-tooltip-label {
+  color: var(--muted);
+  min-width: 35px;
+}
+
+.graph-tooltip-value {
+  color: var(--teal);
+  font-weight: 500;
 }
 
 /* ─── Tabla de iteraciones ───────────────────────────────────────────────────── */
@@ -364,14 +451,93 @@ small {
   padding: 7px 9px;
   border-bottom: 1px solid var(--border);
   color: var(--text);
+  transition: background 0.15s;
 }
 
 .iter-table tr:last-child td {
   border-bottom: none;
 }
 
+.iter-table tbody tr {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.iter-table tbody tr:hover td {
+  background: rgba(108, 189, 181, 0.05);
+}
+
 .iter-table tr.converged td {
   background: rgba(108, 189, 181, 0.07);
+}
+
+.iter-table tr.selected td {
+  background: rgba(245, 158, 66, 0.12) !important;
+  box-shadow: inset 3px 0 0 #f59e42;
+}
+
+/* ─── Convergence Analysis ───────────────────────────────────────────────────── */
+.convergence-box {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(200, 214, 191, 0.1), rgba(108, 189, 181, 0.05));
+  border: 1px solid rgba(200, 214, 191, 0.4);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.convergence-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.convergence-icon {
+  font-size: 13px;
+  color: var(--teal);
+}
+
+.convergence-title {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #6a8a6a;
+  font-weight: 500;
+}
+
+.convergence-text {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.8;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.convergence-next {
+  border-top: 1px solid rgba(200, 214, 191, 0.3);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.convergence-next-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6a8a6a;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.convergence-next-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.convergence-next-list li {
+  margin-bottom: 3px;
 }
 
 /* ─── AI Insight ─────────────────────────────────────────────────────────────── */
@@ -380,7 +546,7 @@ small {
   background: rgba(200, 214, 191, 0.15);
   border: 1px solid rgba(200, 214, 191, 0.4);
   border-radius: 8px;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 .ai-label {
@@ -508,6 +674,122 @@ small {
   font-size: 10px;
   letter-spacing: 2px;
   text-transform: uppercase;
+}
+
+/* ─── Method Tooltip ─────────────────────────────────────────────────────────── */
+.method-tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.method-tooltip-card {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 0;
+  width: 300px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  z-index: 100;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+  font-family: 'DM Mono', monospace;
+  animation: tooltipFadeIn 0.2s ease;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.mtt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.mtt-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.mtt-convergence {
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--teal);
+  padding: 2px 8px;
+  border: 1px solid rgba(108, 189, 181, 0.3);
+  border-radius: 12px;
+  background: rgba(108, 189, 181, 0.08);
+}
+
+.mtt-desc {
+  font-size: 10px;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.mtt-section {
+  margin-bottom: 8px;
+}
+
+.mtt-section-title {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.mtt-list {
+  margin: 0;
+  padding-left: 14px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.mtt-list.pros li::marker { color: var(--teal); }
+.mtt-list.cons li::marker { color: #c06050; }
+
+.mtt-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mtt-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 9px;
+}
+
+.mtt-meta-label {
+  color: var(--muted);
+  min-width: 72px;
+  flex-shrink: 0;
+}
+
+.mtt-meta-value {
+  color: var(--teal);
+}
+
+.mtt-arrow {
+  position: absolute;
+  bottom: -6px;
+  left: 20px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--surface);
 }
 
 /* ─── Desplegable: Procedimiento y ejemplo de cálculo ───────────────────────── */
@@ -696,5 +978,33 @@ small {
 
   .method-tab {
     padding: 8px 12px;
+  }
+
+  .graph-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .graph-controls {
+    align-self: flex-end;
+  }
+
+  .graph-footer {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .method-tooltip-card {
+    position: fixed;
+    bottom: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90vw;
+    max-width: 320px;
+  }
+
+  .mtt-arrow {
+    display: none;
   }
 }
