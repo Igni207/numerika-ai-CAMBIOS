@@ -24,11 +24,24 @@
 ## ✨ Características principales
 
 ### 🧮 Solver interactivo
-- **Métodos numéricos** implementados: Bisección, Regla Falsa, Newton-Raphson, Secante y Punto Fijo
+- **5 métodos numéricos** implementados: Bisección, Regla Falsa, Newton-Raphson, Secante y Punto Fijo
 - Tabla de iteraciones paso a paso con convergencia visual
-- Gráfico interactivo de f(x) con la raíz marcada (Recharts)
+- **Tabla interactiva**: click en una fila marca la iteración en el gráfico con una línea naranja
 - Detección automática de raíces múltiples en el dominio
 - Guía desplegable con procedimiento y ejemplo de cálculo por método
+
+### 📈 Gráfico dinámico con zoom
+- Gráfico Recharts de f(x) con **320px de altura** y 300 puntos para curvas suaves
+- **Controles de zoom** (+, −, reset) con rango 0.3x a 5x, centrado automático en la raíz
+- Ejes X/Y con etiquetas legibles y labels descriptivos
+- Raíz marcada con **label directo** en el gráfico (`x=2.0000`)
+- Tooltip mejorado con indicador ⭐ "Cerca de la raíz" al pasar cerca de la solución
+- Footer con rango X actual y nivel de zoom
+
+### 📚 Documentación contextual
+- **Tooltips en los tabs de métodos**: hover sobre Bisección, Newton, etc. muestra ventajas, limitaciones, complejidad y tipo de convergencia
+- **Análisis de convergencia**: después de calcular, una sección explica *por qué* el método convergió o no, con razones específicas (error teórico, |g′(x)|, convergencia cuadrática, etc.)
+- Sugerencias de "próximos pasos" como reducir tolerancia o comparar con otros métodos
 
 ### 📊 Comparador de métodos
 - Ejecuta los 4 métodos principales simultáneamente para la misma función
@@ -166,7 +179,7 @@ numerika-ai/
     │   ├── Navigation.jsx       # Barra de navegación
     │   ├── IkaWidget.jsx        # Chat con la asistente IKA
     │   ├── FriendlyErrorBox.jsx # Mensajes de error amigables
-    │   ├── InteractiveChart.jsx # Gráfico interactivo
+    │   ├── MethodTooltip.jsx    # Tooltip con docs al hacer hover en tabs
     │   ├── GuideAccordion.jsx   # Guía paso a paso desplegable
     │   ├── Card.jsx             # Card genérica
     │   ├── Form.jsx             # Formularios
@@ -175,17 +188,21 @@ numerika-ai/
     │
     ├── utils/
     │   ├── numericalMethods.js  # Motor de cálculo (5 métodos + graficador)
-    │   └── friendlyErrors.js    # Mapeo de errores técnicos a mensajes amigables
+    │   ├── friendlyErrors.js    # Mapeo de errores técnicos a mensajes amigables
+    │   ├── convergenceAnalyzer.js # Análisis didáctico de convergencia
+    │   └── graphUtils.js        # Cálculos de zoom y rango del gráfico
     │
     ├── services/                # Servicios del backend (IA)
     ├── config/                  # Configuración de BD
     ├── middleware/               # Auth middleware (JWT)
     ├── context/                 # React Context (Auth, IKA)
-    ├── constants/               # Datos estáticos, guías, cards
+    ├── constants/
+    │   ├── data.js              # Datos estáticos, guías, cards
+    │   └── methodDocs.js        # Documentación inline de cada método
     │
     └── styles/
         ├── globals.css          # Variables CSS y estilos base
-        ├── solver.css           # Estilos del solver
+        ├── solver.css           # Estilos del solver + gráfico + tooltips
         ├── comparison.css       # Estilos del comparador + gráficos
         ├── friendly-errors.css  # Estilos de FriendlyErrorBox
         ├── home.css             # Landing page
