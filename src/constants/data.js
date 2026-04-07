@@ -21,8 +21,6 @@ export const MOCK_ROWS = [
   },
 ];
 
-// HOLA QUE HACE 
-
 export const METHODS_DETAILS = [
   {
     id: "biseccion",

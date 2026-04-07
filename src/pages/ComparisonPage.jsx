@@ -91,7 +91,7 @@ export const ComparisonPage = () => {
             converged: validResults.some(r => r.converged),
             root: validResults.find(r => r.converged)?.root || null,
             totalIter: validResults.map(r => r.totalIter).reduce((a,b)=>a+b,0), // Dummy para que no falle el server
-            summary: resultSummary // Pasamos el resumen detallado en una propiedad extra (gemini igual lo leerá al serializar)
+            summary: resultSummary // Pasamos el resumen detallado en una propiedad extra (la IA igual lo leerá al serializar)
           },
         }),
       });
@@ -109,7 +109,7 @@ export const ComparisonPage = () => {
   };
 
   // Se removió el auto-compare inicial para evitar agotar la cuota (rate-limit) 
-  // de la API de Gemini (15 peticiones por minuto) cada vez que el usuario navega a esta página.
+  // de la API de IA cada vez que el usuario navega a esta página.
 
   // ── Contexto de la Asistente IKA ──
   const { updateContext } = useIka();

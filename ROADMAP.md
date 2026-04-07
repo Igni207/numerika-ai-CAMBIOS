@@ -9,7 +9,7 @@ Esta documentación es un mapa completo del código fuente de Numérika-AI. Sirv
 El proyecto funciona con una arquitectura cliente-servidor tradicional acoplada a un motor de inteligencia artificial:
 - **Frontend (Cliente):** React 19 + Vite + React Router v7. Renderiza la UI y mantiene el estado global del usuario (Auth) y su navegación actual (IkaContext).
 - **Backend (Servidor):** Node.js + Express. Gestiona autenticación, Rate Limiting, protege las llaves de acceso secretas y sirve como proxy para la IA.
-- **Microservicio AI:** Google Gemini (vía `gemini-2.0-flash-lite`). Procesa operaciones matemáticas y responde como "IKA".
+- **Microservicio AI:** OpenAI (vía `gpt-4o-mini`). Procesa operaciones matemáticas y responde como "IKA".
 - **Base de Datos:** PostgreSQL (alojado en Railway). Consolidando autenticación de usuarios y persistencia de memoria/historial de los chats IA.
 
 ---
@@ -41,7 +41,7 @@ numerika-ai/
     │
     ├── context/                   # 🧠 Estados Globales (React Context API)
     │   ├── AuthContext.jsx        # Verifica y valida tokens JWT globalmente.
-    │   └── IkaContext.jsx         # Contexto IA: Espía en qué pantalla/estado está el usuario para darle contexto a Gemini.
+    │   └── IkaContext.jsx         # Contexto IA: Espía en qué pantalla/estado está el usuario para darle contexto a la IA.
     │
     ├── utils/                     # ⚙️ Motores Matemáticos de Ejecución
     │   ├── numericalMethods.js    # 👑 NÚCLEO MATEMÁTICO: Lógica pura de Newton, Secante, Bisección, y derivadas (Math.js).
@@ -49,7 +49,7 @@ numerika-ai/
     │   └── StructuralAnalysis.jsx # Simulador interactivo #2 (Deflexión en Estructuras / Ing. Civil).
     │
     ├── services/                  # 🔌 Consumo de APIs Externas
-    │   └── ai.js                  # Lógica del cliente Gemini, inyección de roles (SystemInstruction), retry-loops y rate-limits.
+    │   └── ai.js                  # Lógica del cliente OpenAI, inyección de roles (SystemInstruction), retry-loops y rate-limits.
     │
     ├── constants/                 # 📂 Variables y Configuración Constante
     │   └── data.js                # Base de datos estática: Textos guiados de métodos, descripciones y mapeos visuales.
@@ -74,7 +74,7 @@ numerika-ai/
 1. El usuario navega por las vistas. Cualquier vista envuelta en `App.jsx` inyecta un estado hacia `IkaContext`.
 2. El usuario abre el widget `IkaWidget` y escribe un mensaje.
 3. El frontend compila: [El input del usuario] + [El historial de la DB enviado desde server.js] + [La instrucción dinámica generada del IkaContext para que IKA sepa qué está viendo el usuario en la UI en ese milisegundo].
-4. Envía a Gemini vía endpoint, recibe el string y usa librerías `remark-math` y `rehype-katex` para que las fórmulas matemáticas y código en el chat se rendericen gloriosamente.
+4. Envía a OpenAI vía endpoint, recibe el string y usa librerías `remark-math` y `rehype-katex` para que las fórmulas matemáticas y código en el chat se rendericen gloriosamente.
 
 ---
 
@@ -91,5 +91,5 @@ Este roadmap identifica qué se debe desarrollar de acá en más tras la base ac
 - [ ] **Unit Tests (Pruebas Unitarias):** Implementar *Vitest/Jest* para validar si cada método matemático entrega resultados matemáticamente avalados en todo tipo de ecuaciones, sin tener que confirmarlo a ojo por el desarrollador.
 
 #### Fase 3: Ecosistema y Escalabilidad de IA
-- [ ] **AI Fallback & Cola de Mensajería:** Actualizar el limiter temporal del backend. Con más usuarios concurrentes a escala, la cuota Free-Tier de Gemini fallará; escalar a una API Key de paga con *VertexAI* y añadir WebSockets para streamear texto ("Escribiendo IA...") en tiempo real en la UI en lugar de congelar por "Loading" block síncrono.
+- [ ] **AI Fallback & Cola de Mensajería:** Actualizar el limiter temporal del backend. Con más usuarios concurrentes a escala, escalar a un modelo de producción robusto con OpenAI y añadir WebSockets para streamear texto ("Escribiendo IA...") en tiempo real en la UI en lugar de congelar por "Loading" block síncrono.
 - [ ] **Reconstrucción del sistema `/docs`:** Reactivar y finalizar el sistema de Documentación teórica.

@@ -244,7 +244,7 @@ app.post('/api/ai/chat', authMiddleware, async (req, res) => {
         // así que el historial NO debe incluir el mensaje actual.
         const history = historyResult.rows.slice(0, -1);
 
-        // 3. Generar la respuesta via Gemini
+        // 3. Generar la respuesta via OpenAI
         const reply = await chatWithIka(message, context || "Sin contexto", history);
 
         // 4. Guardar la respuesta de IKA en la BD

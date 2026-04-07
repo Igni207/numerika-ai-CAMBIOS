@@ -9,9 +9,11 @@ import AnalizadorEstructura from "../utils/StructuralAnalysis";
 // La clave debe coincidir con el id en AMN_CARDS (data.js)
 // Almacenamos REFERENCIAS a componentes (no JSX) para evitar bugs de estado compartido
 const APLICATION_MAP = {
-  "semaforo":    SimuladorMultas,
-  "estructura":  AnalizadorEstructura,
-  // "termodinamica": SimuladorCalor,  <-- próxima aplicación
+  "semaforo": SimuladorMultas,
+  "estructura": AnalizadorEstructura,
+  // "termodinamica": SimuladorCalor,
+  // "Cantidad de Personas de Forma Comoda o Critica":  SimuladorPersonas,
+  // "Analisis Termico de Componentes": SimuladorComponentes (Metodo Predictivo),
 };
 
 export const Amn = () => {
