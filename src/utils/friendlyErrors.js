@@ -46,20 +46,20 @@ const ERROR_PATTERNS = [
   {
     pattern: /[Ee]l método diverge/,
     friendly:
-      "La iteración x = g(x) se está alejando cada vez más en lugar de acercarse a la raíz. " +
-      "Esto pasa cuando |g′(x)| ≥ 1 en la zona de la raíz, lo que significa que g(x) no es contractiva.",
+      "La iteración x = f(x) se está alejando cada vez más en lugar de acercarse a la raíz. " +
+      "Esto pasa cuando |f′(x)| ≥ 1 en la zona de la raíz, lo que significa que f (x) no es contractiva.",
     severity: "warning",
-    tip: "Intentá reformular g(x) de otra manera o cambiá el x₀ inicial. Recordá que el método converge solo si |g′(x)| < 1 cerca de la raíz.",
+    tip: "Intentá reformular f(x) de otra manera o cambiá el x₀ inicial. Recordá que el método converge solo si |f′(x)| < 1 cerca de la raíz.",
   },
 
-  // ── Punto Fijo: g(x) diverge (NaN/Infinity) ──
+  // ── Punto Fijo: f(x) diverge (NaN/Infinity) ──
   {
-    pattern: /g\(x\) diverge/,
+    pattern: /f\(x\) diverge/,
     friendly:
-      "La función g(x) produjo un valor infinito o indefinido durante las iteraciones. " +
-      "Esto suele pasar cuando g(x) tiene una asíntota o singularidad cerca del punto donde se está evaluando.",
+      "La función f(x) produjo un valor infinito o indefinido durante las iteraciones. " +
+      "Esto suele pasar cuando f(x) tiene una asíntota o singularidad cerca del punto donde se está evaluando.",
     severity: "warning",
-    tip: "Revisá que g(x) esté bien definida en todo el rango de iteración, o probá con otro x₀.",
+    tip: "Revisá que f(x) esté bien definida en todo el rango de iteración, o probá con otro x₀.",
   },
 
   // ── Error al evaluar g(x) ──
