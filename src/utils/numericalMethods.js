@@ -26,14 +26,14 @@ function preprocessExpr(expr) {
 
   // ── Paso 1: Funciones → tokens (evitar colisiones) ────────────────────
   s = s.replace(/\bsen\b/gi, "__SIN__");
-  s = s.replace(/\bln\b/gi,  "__LN__");
+  s = s.replace(/\bln\b/gi, "__LN__");
 
   // ── Paso 2: log del usuario → log10 (base 10) ────────────────────────
   s = s.replace(/\blog\b/gi, "log10");
 
   // ── Paso 3: Expandir tokens ───────────────────────────────────────────
   s = s.replace(/__SIN__/g, "sin");
-  s = s.replace(/__LN__/g,  "log");  // math.js log = natural
+  s = s.replace(/__LN__/g, "log");  // math.js log = natural
 
   return s;
 }

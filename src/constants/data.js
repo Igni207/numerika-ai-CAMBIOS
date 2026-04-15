@@ -227,6 +227,22 @@ export const AMN_CARDS = [
     tag: "Ingeniería Estructural",
     type: "Secante",
   },
+
+  /* DE MANERA MOMENTANEA LOS DEJAREMOS ASI PARA PODER HACER EL PROYECTO */
+  {
+    id: "circuitos",
+    title: "Análisis de Circuitos",
+    body: "Calcula las corrientes en un circuito eléctrico usando el método de mallas.",
+    tag: "Ingeniería Eléctrica",
+    type: "Gauss",
+  },
+  {
+    id: "enfriamiento",
+    title: "Enfriamiento de Hardware",
+    body: "Calcula cuánto tarda un procesador en llegar a 90°C usando RK4.",
+    tag: "Ingeniería Térmica",
+    type: "RK4",
+  },
   // Futuras aplicaciones:
   // { id: "termodinamica", title: "Transferencia de Calor", tag: "Termodinámica", type: "Bisección / Regla Falsa", body: "..." },
   // { id: "poblacion",     title: "Crecimiento Poblacional", tag: "Demografía",   type: "Punto Fijo",           body: "..." },

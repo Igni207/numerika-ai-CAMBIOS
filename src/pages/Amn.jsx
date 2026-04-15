@@ -2,8 +2,10 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "../components/Card";
 import { AMN_CARDS } from "../constants/data";
-import SimuladorMultas from "../utils/aplicationNumericalMethods";
+import SimuladorMultas from "../utils/TrafficLights";
 import AnalizadorEstructura from "../utils/StructuralAnalysis";
+import SimuladorCircuitos from "../utils/AnalisisCircuitos";
+import SimuladorEnfriamiento from "../utils/CoolingHardware";
 
 // 🚀 MAPEO DE APLICACIONES
 // La clave debe coincidir con el id en AMN_CARDS (data.js)
@@ -11,8 +13,8 @@ import AnalizadorEstructura from "../utils/StructuralAnalysis";
 const APLICATION_MAP = {
   "semaforo": SimuladorMultas,
   "estructura": AnalizadorEstructura,
-  // "termodinamica": SimuladorCalor,
-  // "Cantidad de Personas de Forma Comoda o Critica":  SimuladorPersonas,
+  "circuitos": SimuladorCircuitos,
+  "enfriamiento": SimuladorEnfriamiento,
   // "Analisis Termico de Componentes": SimuladorComponentes (Metodo Predictivo),
 };
 
