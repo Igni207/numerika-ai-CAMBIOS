@@ -10,6 +10,7 @@ import { RegisterPage } from "./pages/RegisterPage";
 import { LoginPage } from "./pages/LoginPage";
 import { useAuth } from "./context/AuthContext";
 import { IkaWidget } from "./components/IkaWidget";
+import { Footer } from "./components/Footer";
 
 // Import styles
 import "./styles/globals.css";
@@ -76,6 +77,8 @@ export default function NumerikaApp() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
+
+      <Footer />
 
       <IkaWidget />
     </div>
