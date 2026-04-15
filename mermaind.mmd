@@ -1,0 +1,244 @@
+%% ═══════════════════════════════════════════════════════════════════════
+%%  NUMÉRIKA-AI · Diagrama de Arquitectura y Flujo Completo
+%%  Actualizado: 2026-04-15
+%% ═══════════════════════════════════════════════════════════════════════
+
+graph TB
+
+  %% ─────────────────────────── ENTRY POINT ───────────────────────────
+  subgraph ENTRY["🚀 Punto de Entrada"]
+    HTML["index.html<br/><i>div#root</i>"]
+    MAIN["main.jsx<br/><i>createRoot · StrictMode</i>"]
+    HTML --> MAIN
+  end
+
+  %% ─────────────────────────── PROVIDERS ─────────────────────────────
+  subgraph PROVIDERS["🧠 Proveedores de Contexto Global"]
+    BR["BrowserRouter<br/><i>React Router v7</i>"]
+    AUTH_CTX["AuthProvider<br/><i>context/AuthContext.jsx</i><br/>JWT · Login state · useAuth"]
+    IKA_CTX["IkaProvider<br/><i>context/IkaContext.jsx</i><br/>contextData · updateContext"]
+    BR --> AUTH_CTX --> IKA_CTX
+  end
+
+  MAIN --> BR
+
+  %% ────────────────────────── APP SHELL ──────────────────────────────
+  subgraph SHELL["🖥️ App Shell — App.jsx"]
+    NAV["Navigation.jsx<br/><i>Header interactivo</i>"]
+    ROUTES["Routes<br/><i>React Router</i>"]
+    FOOTER_C["Footer.jsx<br/><i>Links · Repos · Copyright</i>"]
+    IKA_W["IkaWidget.jsx<br/><i>Chat flotante con IKA</i><br/>Markdown · KaTeX"]
+  end
+
+  IKA_CTX --> SHELL
+
+  %% ────────────────────────── ROUTING ────────────────────────────────
+  subgraph PAGES["📄 Páginas (Vistas)"]
+    HOME["HomePage.jsx<br/><i>/</i>"]
+    SOLVER["SolverPage.jsx<br/><i>/solver · /solver/:methodId</i><br/>Motor de cálculo principal"]
+    COMPARE["ComparisonPage.jsx<br/><i>/comparar</i><br/>Hasta 4 métodos simultáneos"]
+    METHODS["MethodsPage.jsx<br/><i>/metodos</i><br/>Catálogo de métodos"]
+    AMN["Amn.jsx<br/><i>/aplicaciones · /aplicaciones/:appId</i><br/>Renderizador de simuladores"]
+    LOGIN["LoginPage.jsx<br/><i>/login</i>"]
+    REGISTER["RegisterPage.jsx<br/><i>/register</i>"]
+  end
+
+  ROUTES --> HOME
+  ROUTES --> SOLVER
+  ROUTES --> COMPARE
+  ROUTES --> METHODS
+  ROUTES --> AMN
+  ROUTES --> LOGIN
+  ROUTES --> REGISTER
+
+  %% ────────────────────── SIMULADORES (AMN) ──────────────────────────
+  subgraph SIMS["⚙️ Simuladores de Ingeniería — utils/"]
+    SIM_TRAFFIC["TrafficLights.jsx<br/><i>id: semaforo</i><br/>Newton-Raphson · Multas"]
+    SIM_STRUCT["StructuralAnalysis.jsx<br/><i>id: estructura</i><br/>Secante · Deflexión vigas"]
+    SIM_CIRC["AnalisisCircuitos.jsx<br/><i>id: circuitos</i><br/>Gauss · Matrices"]
+    SIM_COOL["CoolingHardware.jsx<br/><i>id: enfriamiento</i><br/>Newton Enfriamiento"]
+  end
+
+  AMN -->|"APLICATION_MAP"| SIM_TRAFFIC
+  AMN -->|"APLICATION_MAP"| SIM_STRUCT
+  AMN -->|"APLICATION_MAP"| SIM_CIRC
+  AMN -->|"APLICATION_MAP"| SIM_COOL
+
+  %% ──────────────────── MOTOR MATEMÁTICO ─────────────────────────────
+  subgraph MATH["🔢 Núcleo Matemático"]
+    NUM_METHODS["numericalMethods.js<br/><i>Bisección · Newton · Secante<br/>Punto Fijo · Regula Falsi<br/>Derivadas · math.js parser</i>"]
+    CONV_ANALYZER["convergenceAnalyzer.js<br/><i>Análisis didáctico<br/>de convergencia</i>"]
+    SYS_EQ["SystemEcuation.js<br/><i>Gauss-Jordan<br/>Sistemas de ecuaciones</i>"]
+    GRAPH_UTILS["graphUtils.js<br/><i>Helpers para gráficos</i>"]
+    FRIENDLY_ERR["friendlyErrors.js<br/><i>Mensajes de error amigables</i>"]
+  end
+
+  SOLVER -->|"Ejecuta métodos"| NUM_METHODS
+  SOLVER -->|"Analiza convergencia"| CONV_ANALYZER
+  COMPARE -->|"Ejecuta métodos"| NUM_METHODS
+  SIM_TRAFFIC --> NUM_METHODS
+  SIM_STRUCT --> NUM_METHODS
+  SIM_CIRC --> SYS_EQ
+  SIM_COOL --> NUM_METHODS
+
+  %% ──────────────────── COMPONENTES UI ───────────────────────────────
+  subgraph COMPONENTS["🧩 Componentes de UI"]
+    CARD["Card.jsx<br/><i>Tarjetas de método</i>"]
+    FORM_C["Form.jsx<br/><i>Formulario del solver</i>"]
+    FIELD["Field.jsx<br/><i>Inputs numéricos</i>"]
+    CHART["InteractiveChart.jsx<br/><i>Recharts · Zoom · Roots</i>"]
+    GUIDE["GuideAccordion.jsx<br/><i>Documentación interactiva</i>"]
+    TAG["MethodTypeTag.jsx<br/><i>Badges de tipo</i>"]
+    TOOLTIP["MethodTooltip.jsx<br/><i>Info contextual</i>"]
+    ERR_BOX["FriendlyErrorBox.jsx<br/><i>Errores con sugerencias</i>"]
+    MOCK["MockGraph.jsx<br/><i>Gráfico de preview</i>"]
+  end
+
+  HOME --> CARD
+  METHODS --> CARD
+  METHODS --> TAG
+  SOLVER --> FORM_C
+  SOLVER --> CHART
+  SOLVER --> GUIDE
+  SOLVER --> ERR_BOX
+  COMPARE --> CHART
+  ERR_BOX --> FRIENDLY_ERR
+
+  %% ──────────────────── CONSTANTES / DATA ────────────────────────────
+  subgraph DATA["📂 Datos Estáticos"]
+    DATA_JS["data.js<br/><i>METHOD_LIST · AMN_CARDS<br/>CATEGORY_MAP · Textos guía</i>"]
+    METHOD_DOCS["methodDocs.js<br/><i>Documentación de métodos<br/>para GuideAccordion</i>"]
+  end
+
+  CARD --> DATA_JS
+  AMN --> DATA_JS
+  SOLVER --> DATA_JS
+  GUIDE --> METHOD_DOCS
+
+  %% ═══════════════════════════════════════════════════════════════════
+  %%  BACKEND
+  %% ═══════════════════════════════════════════════════════════════════
+
+  subgraph BACKEND["🖧 Backend — server.js (Express)"]
+    direction TB
+
+    subgraph MIDDLEWARES["Middlewares"]
+      HELMET["helmet<br/><i>Seguridad HTTP</i>"]
+      CORS_MW["cors<br/><i>localhost:5173 · vercel</i>"]
+      JSON_MW["express.json"]
+    end
+
+    subgraph AUTH_ROUTES["Rutas de Autenticación"]
+      R_REGISTER["POST /api/auth/register<br/><i>bcrypt hash · JWT</i>"]
+      R_LOGIN["POST /api/auth/login<br/><i>Verifica hash · JWT</i>"]
+      R_ME["GET /api/auth/me<br/><i>Valida token activo</i>"]
+    end
+
+    subgraph AI_ROUTES["Rutas de IA"]
+      R_EXPLAIN["POST /api/ai/explain<br/><i>Explicación pedagógica<br/>de un cálculo</i>"]
+      R_CHAT_H["GET /api/ai/chat/history<br/><i>Últimos 50 mensajes</i>"]
+      R_CHAT["POST /api/ai/chat<br/><i>Mensaje a IKA<br/>Guarda en BD</i>"]
+    end
+  end
+
+  %% ──────────────────── SERVICIOS BACKEND ────────────────────────────
+  subgraph SERVICES["🔌 Servicios"]
+    AI_SERVICE["services/ai.js<br/><i>OpenAI SDK · gpt-4o-mini<br/>generateExplanation<br/>chatWithIka<br/>checkRateLimit<br/>Retry con backoff</i>"]
+    AUTH_MW["middleware/auth.js<br/><i>generateToken · authMiddleware<br/>JWT verify · 7d expiry</i>"]
+    DB["config/db.js<br/><i>pg Pool · DATABASE_URL</i>"]
+  end
+
+  R_REGISTER --> AUTH_MW
+  R_LOGIN --> AUTH_MW
+  R_ME --> AUTH_MW
+  R_EXPLAIN --> AI_SERVICE
+  R_CHAT --> AI_SERVICE
+  R_CHAT --> DB
+  R_CHAT_H --> DB
+  R_REGISTER --> DB
+  R_LOGIN --> DB
+  R_ME --> DB
+
+  %% ──────────────────── EXTERNAL ─────────────────────────────────────
+  subgraph EXTERNAL["☁️ Servicios Externos"]
+    OPENAI["OpenAI API<br/><i>gpt-4o-mini</i>"]
+    POSTGRES["PostgreSQL<br/><i>Railway</i><br/>users · ika_chats"]
+  end
+
+  AI_SERVICE -->|"HTTP"| OPENAI
+  DB -->|"TCP"| POSTGRES
+
+  %% ──────────────────── CONEXIONES FRONTEND ↔ BACKEND ────────────────
+  LOGIN -->|"POST /api/auth/login"| R_LOGIN
+  REGISTER -->|"POST /api/auth/register"| R_REGISTER
+  AUTH_CTX -->|"GET /api/auth/me"| R_ME
+  SOLVER -->|"POST /api/ai/explain"| R_EXPLAIN
+  COMPARE -->|"POST /api/ai/explain"| R_EXPLAIN
+  IKA_W -->|"POST /api/ai/chat"| R_CHAT
+  IKA_W -->|"GET /api/ai/chat/history"| R_CHAT_H
+
+  %% ──────────────────── ESTILOS ──────────────────────────────────────
+  subgraph STYLES["💅 Sistema de Diseño CSS"]
+    S_GLOBAL["globals.css · index.css"]
+    S_NAV["nav.css"]
+    S_SOLVER["solver.css"]
+    S_CARDS["cards.css"]
+    S_HOME["home.css"]
+    S_AUTH["auth.css"]
+    S_IKA["ika.css"]
+    S_COMP["comparison.css"]
+    S_SIM["simulators.css"]
+    S_BTN["buttons.css"]
+    S_FOOT["footer.css"]
+    S_ERR["friendly-errors.css"]
+  end
+
+  %% ═══════════════════════════════════════════════════════════════════
+  %%  FLUJOS PRINCIPALES
+  %% ═══════════════════════════════════════════════════════════════════
+
+  %% --- Flujo A: Resolver un método numérico ---
+  %% Usuario → SolverPage → numericalMethods.js → Resultado
+  %%        → convergenceAnalyzer.js → Análisis
+  %%        → InteractiveChart → Gráfico
+  %%        → /api/ai/explain → Explicación pedagógica
+
+  %% --- Flujo B: Chat con IKA ---
+  %% Usuario → IkaWidget → IkaContext (espía página actual)
+  %%        → POST /api/ai/chat (message + context + history)
+  %%        → OpenAI → Respuesta con Markdown/KaTeX
+
+  %% --- Flujo C: Autenticación ---
+  %% Usuario → LoginPage/RegisterPage → POST /api/auth/*
+  %%        → bcrypt + JWT → AuthContext (token localStorage)
+  %%        → GET /api/auth/me (validación al cargar app)
+
+  %% --- Flujo D: Simuladores AMN ---
+  %% Usuario → /aplicaciones → Amn.jsx (lista AMN_CARDS)
+  %%        → /aplicaciones/:appId → APLICATION_MAP[appId]
+  %%        → Componente simulador → numericalMethods.js / SystemEcuation.js
+
+  %% ──────────────────── STYLING ──────────────────────────────────────
+  classDef entry fill:#1a1a2e,stroke:#e94560,color:#fff
+  classDef provider fill:#16213e,stroke:#0f3460,color:#e0e0ff
+  classDef page fill:#0f3460,stroke:#53a8b6,color:#fff
+  classDef sim fill:#1b2838,stroke:#66c0f4,color:#c6d4df
+  classDef math fill:#2d1b69,stroke:#bd93f9,color:#f8f8f2
+  classDef comp fill:#1e3a5f,stroke:#7ec8e3,color:#fff
+  classDef backend fill:#1a3c34,stroke:#50fa7b,color:#f0fff0
+  classDef service fill:#2b4141,stroke:#ff79c6,color:#fff
+  classDef external fill:#3b0764,stroke:#c084fc,color:#f5f3ff
+  classDef data fill:#44337a,stroke:#e9d8fd,color:#faf5ff
+  classDef styles fill:#1c1c1c,stroke:#555,color:#aaa
+
+  class HTML,MAIN entry
+  class BR,AUTH_CTX,IKA_CTX provider
+  class HOME,SOLVER,COMPARE,METHODS,AMN,LOGIN,REGISTER page
+  class SIM_TRAFFIC,SIM_STRUCT,SIM_CIRC,SIM_COOL sim
+  class NUM_METHODS,CONV_ANALYZER,SYS_EQ,GRAPH_UTILS,FRIENDLY_ERR math
+  class CARD,FORM_C,FIELD,CHART,GUIDE,TAG,TOOLTIP,ERR_BOX,MOCK,NAV,FOOTER_C,IKA_W comp
+  class HELMET,CORS_MW,JSON_MW,R_REGISTER,R_LOGIN,R_ME,R_EXPLAIN,R_CHAT_H,R_CHAT backend
+  class AI_SERVICE,AUTH_MW,DB service
+  class OPENAI,POSTGRES external
+  class DATA_JS,METHOD_DOCS data
+  class S_GLOBAL,S_NAV,S_SOLVER,S_CARDS,S_HOME,S_AUTH,S_IKA,S_COMP,S_SIM,S_BTN,S_FOOT,S_ERR styles
