@@ -54,7 +54,7 @@ export const IkaWidget = () => {
 
         const userMsg = inputValue.trim();
         const newMessages = [...messages, { role: 'user', content: userMsg }];
-
+        
         setMessages(newMessages);
         setInputValue('');
         setIsLoading(true);
@@ -68,7 +68,7 @@ export const IkaWidget = () => {
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/api/ai/chat`, {
                 method: 'POST',
-                headers: {
+                headers: { 
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -76,13 +76,13 @@ export const IkaWidget = () => {
             });
 
             const data = await response.json();
-
+            
             if (data.success) {
                 setMessages(prev => [...prev, { role: 'model', content: data.reply }]);
             } else {
-                setMessages(prev => [...prev, {
-                    role: 'model',
-                    content: `⚠️ Ups... Hubo un problema de conexión (o rate limit). ${data.error || ''}`
+                setMessages(prev => [...prev, { 
+                    role: 'model', 
+                    content: `⚠️ Ups... Hubo un problema de conexión (o rate limit). ${data.error || ''}` 
                 }]);
             }
         } catch (error) {
@@ -106,7 +106,7 @@ export const IkaWidget = () => {
     return (
         <div className="ika-wrapper">
             {/* Widget Button */}
-            <button
+            <button 
                 className={`ika-fab ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Abrir asistente IKA"
@@ -116,7 +116,7 @@ export const IkaWidget = () => {
                 ) : (
                     <>
                         <Sparkles size={20} color="#FFF" />
-                        <span className="ika-fab-text">IKA</span>
+                        <span className="ika-fab-text">IKA Asistente</span>
                     </>
                 )}
             </button>
@@ -144,8 +144,8 @@ export const IkaWidget = () => {
                     {messages.map((msg, i) => (
                         <div key={i} className={`ika-msg-row ${msg.role}`}>
                             <div className="ika-bubble">
-                                <ReactMarkdown
-                                    remarkPlugins={[remarkMath]}
+                                <ReactMarkdown 
+                                    remarkPlugins={[remarkMath]} 
                                     rehypePlugins={[rehypeKatex]}
                                 >
                                     {msg.content}
@@ -174,7 +174,7 @@ export const IkaWidget = () => {
                             onChange={(e) => setInputValue(e.target.value)}
                             onKeyDown={handleKeyDown}
                         />
-                        <button
+                        <button 
                             className="ika-send-btn"
                             disabled={!inputValue.trim() || isLoading}
                             onClick={handleSend}

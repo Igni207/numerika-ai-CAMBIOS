@@ -4,296 +4,189 @@ import {
   Tooltip, ReferenceLine, ResponsiveContainer,
 } from "recharts";
 
+// ─── Paleta de Colores NumérikaAI ───────────────────────────────────────────
+const C = {
+  cream: "#E3DFBA", sage: "#C8D6BF", teal: "#6CBDB5", 
+  dark: "#1A1F1E", bg: "#f5f3e8", surface: "#faf9f2", 
+  border: "#dddbc8", muted: "#7a8a82", text: "#1A1F1E",
+};
+
 // ─── Componente Principal ─────────────────────────────────────────────────────
 export default function SimuladorMultas() {
+  // 1. ESTADOS DE PARÁMETROS
   const [params, setParams] = useState({
-    rho: 5000,    // Densidad poblacional (hab/km²)
-    beta: 0.5,    // Tasa vehicular (vehículos/hab)
-    k: 1000,      // Multa base ($)
-    L: 4500,      // Multa objetivo ($)
-    alpha: 100,   // Sensibilidad al riesgo
+    rho: 5000,   // Población
+    beta: 0.5,   // Tasa vehicular
+    k: 1000,     // Multa base
+    L: 4500,     // Multa objetivo
+    alpha: 100   // Sensibilidad
   });
 
   const [result, setResult] = useState(null);
-  const [showAllIter, setShowAllIter] = useState(false);
 
-  // ─── Motor Newton-Raphson ─────────────────────────────────────────────────
+  // 2. MOTOR DE CÁLCULO (Newton-Raphson)
   const calcularEquilibrio = () => {
     const { rho, beta, k, L, alpha } = params;
-
-    if (L <= k || rho <= 0 || beta <= 0 || alpha <= 0) {
-      setResult(null);
-      return;
-    }
-
-    // f(σ) = k + α·(ρ·β / σ) - L = 0
-    // Despejando σ: σ* = α·ρ·β / (L - k)
+    
+    // Función: f(sigma) = k + alpha * (rho * beta / sigma) - L
     const f = (s) => k + (alpha * (rho * beta) / s) - L;
-    const fDeriv = (s) => -(alpha * (rho * beta)) / (s * s);
+    const fDerivada = (s) => -(alpha * (rho * beta)) / Math.pow(s, 2);
 
-    let sigma = 5.0;
+    let sigma_n = 5.0; // Semilla inicial sugerida
     const tol = 0.0001;
-    const iterations = [];
+    let iterations = [];
     let converged = false;
 
-    for (let i = 0; i < 50; i++) {
-      const y = f(sigma);
-      const d = fDeriv(sigma);
+    for (let i = 0; i < 25; i++) {
+      let y = f(sigma_n);
+      let d = fDerivada(sigma_n);
+      
       if (Math.abs(d) < 1e-10) break;
 
-      const nextSigma = sigma - y / d;
-      if (!isFinite(nextSigma) || nextSigma <= 0) break;
+      let next_sigma = sigma_n - (y / d);
+      let error = Math.abs((next_sigma - sigma_n) / next_sigma) * 100;
 
-      const error = Math.abs((nextSigma - sigma) / nextSigma) * 100;
       iterations.push({
         n: i + 1,
-        sigma: sigma.toFixed(6),
-        fs: y.toFixed(6),
-        fpx: d.toFixed(6),
-        error: error.toFixed(4),
-        converged: error < tol,
+        sigma: sigma_n.toFixed(4),
+        fs: y.toFixed(4),
+        error: error.toFixed(4)
       });
 
       if (error < tol) {
         converged = true;
-        sigma = nextSigma;
+        sigma_n = next_sigma;
         break;
       }
-      sigma = nextSigma;
+      sigma_n = next_sigma;
     }
 
-    setResult({ root: sigma, iterations, converged, totalIter: iterations.length });
+    setResult({
+      root: sigma_n,
+      iterations: iterations,
+      converged: converged,
+      totalIter: iterations.length
+    });
   };
 
+  // Recalcular automáticamente
   useEffect(() => {
-    calcularEquilibrio();
+    if (params.L > params.k && params.rho > 0) {
+      calcularEquilibrio();
+    }
   }, [params]);
 
-  // ─── Puntos para el gráfico ───────────────────────────────────────────────
+  // 3. GENERACIÓN DE PUNTOS PARA EL GRÁFICO
   const graphPoints = useMemo(() => {
-    if (!result) return [];
+    let points = [];
+    if (!result) return points;
+    
     const root = result.root;
-    const start = Math.max(0.5, root - root * 0.6);
-    const end = root + root * 0.6;
-    const steps = 80;
-    const points = [];
-    for (let i = 0; i <= steps; i++) {
-      const s = start + (i / steps) * (end - start);
+    const start = Math.max(1, root - 50);
+    const end = root + 50;
+
+    for (let s = start; s <= end; s += (end - start) / 40) {
       const val = params.k + (params.alpha * (params.rho * params.beta) / s) - params.L;
-      if (isFinite(val) && Math.abs(val) < 1e6) {
-        points.push({ x: parseFloat(s.toFixed(3)), y: parseFloat(val.toFixed(3)) });
-      }
+      points.push({ x: parseFloat(s.toFixed(2)), y: parseFloat(val.toFixed(2)) });
     }
     return points;
   }, [params, result]);
 
-  const displayedIter = showAllIter
-    ? result?.iterations
-    : result?.iterations.slice(-5);
-
   return (
-    <div className="sim-container">
+    <div style={{ fontFamily: "'DM Mono', monospace", color: C.text }}>
+      
+      {/* Grid de dos columnas estilo Solver */}
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, alignItems: "start" }}>
 
-      {/* ── Descripción del Método ─────────────────────────────────────────── */}
-      <div className="sim-desc-box">
-        <div className="sim-desc-header">
-          <span className="sim-eyebrow">Modelo Matemático</span>
-          <span className="sim-tag sim-tag-teal">
-            Newton-Raphson
-          </span>
+      {/* ── Futura Descripción del método ── */}  
+                    {/* ... */}
+
+        {/* ── PANEL DE CONFIGURACIÓN (Izquierda) ── */}
+        <div style={panelStyle}>
+          <div style={panelHeaderStyle}>
+            <span style={labelStyle}>Variables Urbanas</span>
+            <span style={tagStyle}>Modelo 1.0</span>
+          </div>
+          <div className="field" style={{ padding: 20 }}>
+            <Field label="Población (hab/km²)" value={params.rho} onChange={v => setParams({...params, rho: v})} />
+            <Field label="Tasa Vehicular (β)" value={params.beta} onChange={v => setParams({...params, beta: v})} />
+            <Field label="Multa Objetivo (L)" value={params.L} onChange={v => setParams({...params, L: v})} />
+            
+            <div style={{ borderTop: `1px solid ${C.border}`, margin: "18px 0" }} />
+            
+            <p style={{ fontSize: 10, color: C.muted, lineHeight: 1.5 }}>
+              * El simulador ajusta la <strong>densidad de infraestructura</strong> para equilibrar el costo operativo (L).
+            </p>
+          </div>
         </div>
-        <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.8, margin: "10px 0 6px" }}>
-          Dado un territorio con densidad <strong>ρ</strong> hab/km² y tasa
-          vehicular <strong>β</strong>, el modelo busca la densidad óptima de
-          infraestructura de control <strong>σ*</strong> tal que el costo de
-          operación se equilibre con la multa objetivo <strong>L</strong>:
-        </p>
-        <div className="sim-formula-box">
-          f(σ) = k + α · (ρ · β / σ) − L = 0
-        </div>
-        <p style={{ fontSize: 11, color: "var(--muted)", lineHeight: 1.7, marginTop: 8 }}>
-          El método de <strong>Newton-Raphson</strong> itera usando la derivada
-          analítica f′(σ) = −α·ρ·β / σ² para converger cuadráticamente a la solución.
-        </p>
-      </div>
 
-      {/* ── Grid Principal ────────────────────────────────────────────────── */}
-      <div className="sim-grid">
-
-        {/* ── Panel de Configuración ── */}
-        <div className="sim-panel">
-          <div className="sim-panel-header">
-            <span className="sim-eyebrow">Variables Urbanas</span>
-            <span className="sim-tag sim-tag-sage">
-              Modelo 1.0
-            </span>
+        {/* ── PANEL DE RESULTADOS (Derecha) ── */}
+        <div className="panel">
+          <div className="panel-header">
+            <span className="panel-title">Resultado</span>
+            {result && <span style={{ fontSize: 9 }}>{result.totalIter} iteraciones</span>}
           </div>
           <div style={{ padding: 20 }}>
-
-            <SectionLabel text="Población" />
-            <Field
-              label="Densidad poblacional ρ (hab/km²)"
-              value={params.rho}
-              onChange={v => setParams({ ...params, rho: v })}
-              hint="Habitantes por kilómetro cuadrado"
-            />
-            <Field
-              label="Tasa vehicular β (veh/hab)"
-              value={params.beta}
-              onChange={v => setParams({ ...params, beta: v })}
-              hint="Vehículos por habitante (0.1 – 2.0)"
-              step={0.05}
-            />
-
-            <div className="sim-divider" />
-            <SectionLabel text="Economía" />
-            <Field
-              label="Multa base k ($)"
-              value={params.k}
-              onChange={v => setParams({ ...params, k: v })}
-              hint="Costo base por infracción"
-            />
-            <Field
-              label="Multa objetivo L ($)"
-              value={params.L}
-              onChange={v => setParams({ ...params, L: v })}
-              hint="Debe ser mayor que k"
-            />
-
-            <div className="sim-divider" />
-            <SectionLabel text="Modelo" />
-            <Field
-              label="Sensibilidad al riesgo α"
-              value={params.alpha}
-              onChange={v => setParams({ ...params, alpha: v })}
-              hint="Factor de ajuste del modelo"
-            />
-
-            {/* Advertencia si L <= k */}
-            {params.L <= params.k && (
-              <div className="sim-warn">
-                ⚠ La multa objetivo L debe ser mayor que la multa base k.
-              </div>
-            )}
-
-          </div>
-        </div>
-
-        {/* ── Panel de Resultados ── */}
-        <div className="sim-panel">
-          <div className="sim-panel-header">
-            <span className="sim-eyebrow">Resultado</span>
-            {result && (
-              <span style={{ fontSize: 9, color: "var(--muted)", letterSpacing: "1px" }}>
-                {result.totalIter} iteración{result.totalIter !== 1 ? "es" : ""}
-              </span>
-            )}
-          </div>
-          <div style={{ padding: 20 }}>
-            {!result ? (
-              <div className="sim-placeholder">
-                <p className="sim-placeholder-text">
-                  Ajustá los parámetros para calcular
-                </p>
-              </div>
-            ) : (
+            {result ? (
               <>
-                {/* Status */}
-                <div className="sim-status" style={{
-                  background: result.converged ? "rgba(108,189,181,0.1)" : "rgba(220,180,100,0.1)",
-                  border: `1px solid ${result.converged ? "rgba(108,189,181,0.3)" : "rgba(220,180,100,0.3)"}`,
-                }}>
-                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: result.converged ? "var(--teal)" : "#d4a84b", flexShrink: 0 }} />
-                  <span style={{ color: result.converged ? "var(--teal)" : "#d4a84b", fontSize: 10, letterSpacing: "1px", textTransform: "uppercase" }}>
-                    {result.converged
-                      ? `Equilibrio hallado · σ* ≈ ${result.root.toFixed(4)}`
-                      : `Sin convergencia tras ${result.totalIter} iteraciones`}
-                  </span>
+                {/* Status Bar */}
+                <div style={{ ...statusBar, background: result.converged ? "rgba(108,189,181,0.1)" : "rgba(220,180,100,0.1)" }}>
+                   <span style={{ color: result.converged ? C.teal : "#d4a84b" }}>
+                    {result.converged ? `✓ Punto de equilibrio hallado en σ ≈ ${result.root.toFixed(4)}` : "Buscando convergencia..."}
+                   </span>
                 </div>
 
-                {/* Gráfico */}
-                <div className="sim-graph">
-                  <div className="sim-graph-title">
-                    f(σ) = k + α·(ρ·β/σ) − L
-                  </div>
-                  <ResponsiveContainer width="100%" height={175}>
-                    <LineChart data={graphPoints} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
-                      <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" />
-                      <XAxis dataKey="x" tick={{ fontSize: 9, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }} />
-                      <YAxis tick={{ fontSize: 9, fill: "var(--muted)", fontFamily: "'DM Mono', monospace" }} />
-                      <Tooltip
-                        contentStyle={{ fontSize: 10, borderRadius: 8, fontFamily: "'DM Mono', monospace", border: `1px solid var(--border)`, background: "var(--surface)" }}
-                        labelFormatter={(v) => `σ = ${v}`}
-                        formatter={(v) => [`f(σ) = ${v}`, ""]}
-                      />
-                      <ReferenceLine y={0} stroke="var(--muted)" strokeWidth={1} />
-                      <ReferenceLine
-                        x={parseFloat(result.root.toFixed(3))}
-                        stroke="#6CBDB5"
-                        strokeDasharray="5 3"
-                        strokeWidth={1.5}
-                        label={{ value: `σ*=${result.root.toFixed(2)}`, position: "top", fontSize: 9, fill: "#6CBDB5" }}
-                      />
-                      <Line type="monotone" dataKey="y" stroke="#6CBDB5" strokeWidth={2} dot={false} connectNulls={false} />
+                {/* Gráfico de Recharts */}
+                <div style={graphContainer}>
+                  <ResponsiveContainer width="100%" height={180}>
+                    <LineChart data={graphPoints}>
+                      <CartesianGrid stroke={C.border} strokeDasharray="3 3" />
+                      <XAxis dataKey="x" tick={{ fontSize: 9 }} label={{ value: 'σ', position: 'insideBottomRight', offset: -5 }} />
+                      <YAxis tick={{ fontSize: 9 }} />
+                      <Tooltip contentStyle={{ fontSize: 10, borderRadius: 8 }} />
+                      <ReferenceLine y={0} stroke={C.muted} />
+                      <ReferenceLine x={result.root} stroke={C.teal} strokeDasharray="3 3" />
+                      <Line type="monotone" dataKey="y" stroke={C.teal} dot={false} strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
 
-                {/* Tabla de Iteraciones con scroll */}
-                <div style={{ marginTop: 20 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                    <span className="sim-eyebrow">Tabla de Iteraciones</span>
-                    <button
-                      className="sim-btn-toggle"
-                      onClick={() => setShowAllIter(v => !v)}
-                    >
-                      {showAllIter ? "Mostrar últimas 5" : `Ver todas (${result.iterations.length})`}
-                    </button>
-                  </div>
-
-                  <div className="sim-table-wrap">
-                    <table className="sim-table">
-                      <thead>
-                        <tr>
-                          {["n", "σₙ", "f(σₙ)", "f′(σₙ)", "Error %"].map(h => (
-                            <th key={h}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {displayedIter.map((row, i) => (
-                          <tr key={i} style={{ background: row.converged ? "rgba(108,189,181,0.07)" : "transparent" }}>
-                            <td>{row.n}</td>
-                            <td>{row.sigma}</td>
-                            <td>{row.fs}</td>
-                            <td>{row.fpx}</td>
-                            <td style={{ color: row.converged ? "var(--teal)" : "var(--text)", fontWeight: row.converged ? 500 : 400 }}>
-                              {row.error === "0.0000" ? "—" : `${row.error}%`}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                {/* Tabla de Iteraciones resumida */}
+                <div className="table-wrap" style={{ overflowX: "auto", marginTop: 24 }}>
+                  <table style={tableStyle}>
+                    <thead>
+                      <tr>
+                        <th style={thStyle}>n</th>
+                        <th style={thStyle}>Sigma (σ)</th>
+                        <th style={thStyle}>f(σ)</th>
+                        <th style={thStyle}>Error %</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.iterations.slice(-5).map((it, i) => (
+                        <tr key={i}>
+                          <td style={tdStyle}>{it.n}</td>
+                          <td style={tdStyle}>{it.sigma}</td>
+                          <td style={tdStyle}>{it.fs}</td>
+                          <td style={{ ...tdStyle, color: C.teal, fontWeight: "500" }}>
+                      {it.error === "0.0000" ? "—" : `${it.error}%`}
+                      </td>
+                      </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
 
-                {/* Insight */}
-                <div className="sim-ai-box">
-                  <div className="sim-ai-label">
-                    <span style={{ width: 4, height: 4, borderRadius: "50%", background: "var(--sage)", display: "inline-block", marginRight: 6 }} />
-                    Interpretación del Resultado
-                  </div>
-                  <p style={{ margin: 0, fontSize: 11, color: "var(--muted)", lineHeight: 1.8 }}>
-                    Para una zona con <strong>{params.rho} hab/km²</strong> y tasa
-                    vehicular <strong>β = {params.beta}</strong>, el modelo
-                    converge en <strong>{result.totalIter} iteraciones</strong> a
-                    una densidad óptima de infraestructura de{" "}
-                    <strong style={{ color: "var(--teal)" }}>σ* = {result.root.toFixed(4)}</strong> dispositivos/km²,
-                    punto en el que el costo operativo se equilibra con la multa objetivo de{" "}
-                    <strong>${params.L}</strong>.
+                {/* AI Insight */}
+                <div style={aiBoxStyle}>
+                  <div style={aiLabelStyle}>Insight de Ingeniería</div>
+                  <p style={{ margin: 0 }}>
+                    Para optimizar la seguridad en una zona de <strong>{params.rho} hab/km²</strong>, el sistema sugiere una densidad de <strong>{result.root.toFixed(2)}</strong> dispositivos por unidad de área para estabilizar el impacto económico objetivo.
                   </p>
                 </div>
               </>
+            ) : (
+              <p style={{ textAlign: "center", color: C.muted }}>Calculando modelo...</p>
             )}
           </div>
         </div>
@@ -303,29 +196,49 @@ export default function SimuladorMultas() {
   );
 }
 
-// ─── Helpers de UI ────────────────────────────────────────────────────────────
-function SectionLabel({ text }) {
-  return (
-    <div className="sim-section-label">
-      {text}
-    </div>
-  );
-}
+// ─── Estilos y Helpers (Consistentes con Solver) ──────────────────────────────
+const panelStyle = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: "hidden" };
+const panelHeaderStyle = { padding: "14px 20px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" };
+const labelStyle = { fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: C.muted };
+const tagStyle = { fontSize: 9, letterSpacing: "1px", textTransform: "uppercase", padding: "3px 10px", borderRadius: 20, color: "#6a8a6a", background: "rgba(200,214,191,0.15)" };
+const statusBar = { padding: "10px 15px", borderRadius: 8, marginBottom: 16, fontSize: 10, letterSpacing: "1px", textTransform: "uppercase", display: "flex", alignItems: "center", gap: 8 };
+const graphContainer = { background: C.bg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "15px 10px 5px" };
+const tableStyle = {
+  width: "100%",
+  borderCollapse: "collapse", // Crucial para que las líneas se vean bien
+  fontSize: "11px",
+  fontFamily: "'DM Mono', monospace",
+};
 
-function Field({ label, value, onChange, hint, step = 1 }) {
+const thStyle = {
+  fontSize: "9px",
+  letterSpacing: "1.5px",
+  textTransform: "uppercase",
+  color: C.muted,
+  textAlign: "left",
+  padding: "12px 10px", // Más aire arriba y abajo
+  borderBottom: `1px solid ${C.border}`, // Línea divisoria del header
+  fontWeight: "500",
+};
+
+const tdStyle = {
+  padding: "14px 10px", // Espaciado generoso para que sea "entendible"
+  borderBottom: `1px solid rgba(221, 219, 200, 0.5)`, // Línea sutil entre filas
+  color: C.text,
+};
+const aiBoxStyle = { padding: "14px 16px", background: "rgba(200,214,191,0.15)", border: "1px solid rgba(200,214,191,0.4)", borderRadius: 8, marginTop: 16, fontSize: 11, color: C.muted, lineHeight: 1.6 };
+const aiLabelStyle = { fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#6a8a6a", marginBottom: 6 };
+
+function Field({ label, value, onChange }) {
   return (
-    <div className="sim-field">
-      <label className="sim-field-label">
-        {label}
-      </label>
+    <div style={{ marginBottom: 15 }}>
+      <label style={{ display: "block", fontSize: 9, textTransform: "uppercase", color: "#7a8a82", marginBottom: 5 }}>{label}</label>
       <input
         type="number"
-        step={step}
-        className="sim-field-input"
+        style={{ width: "100%", background: "#f5f3e8", border: "1px solid #dddbc8", borderRadius: 8, padding: "8px 12px", fontFamily: "'DM Mono', monospace", fontSize: 13, outline: "none" }}
         value={value}
         onChange={e => onChange(Number(e.target.value))}
       />
-      {hint && <div className="sim-field-hint">{hint}</div>}
     </div>
   );
 }
