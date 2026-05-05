@@ -1,7 +1,12 @@
-
 /**
- * Navigation — Barra de navegación sticky en la parte superior
+ * Navigation — NumérikaAI
+ * Features: scroll-aware, pill indicator, hamburger drawer, tools dropdown
  */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   BASE NAV BAR
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
 .nav {
   display: flex;
   align-items: center;
@@ -11,9 +16,23 @@
   background: var(--dark);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 200;
   gap: 24px;
+  transition: height 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
 }
+
+/* ── Scroll-aware: compacted state ── */
+.nav--scrolled {
+  height: 48px;
+  background: rgba(26, 31, 30, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 1px 0 rgba(108, 189, 181, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   LOGO
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
 .nav-logo {
   font-family: 'DM Serif Display', serif;
@@ -21,10 +40,14 @@
   color: var(--cream);
   letter-spacing: 1px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s, font-size 0.3s;
   white-space: nowrap;
   flex-shrink: 0;
   text-decoration: none;
+}
+
+.nav--scrolled .nav-logo {
+  font-size: 16px;
 }
 
 .nav-logo:hover {
@@ -36,13 +59,22 @@
   font-style: italic;
 }
 
-/* ─── Links de navegación ─── */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DESKTOP LINKS + PILL INDICATOR
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.nav-links-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
 .nav-links {
   display: flex;
-  gap: 36px;
+  gap: 28px;
   list-style: none;
-  flex: 1;
-  justify-content: center;
+  align-items: center;
 }
 
 .nav-links li {
@@ -55,12 +87,12 @@
   text-transform: uppercase;
   color: #6a7a72;
   cursor: pointer;
-  transition: all 0.2s;
-  padding: 4px 0;
-  border-bottom: 2px solid transparent;
+  transition: color 0.2s;
+  padding: 6px 0;
   white-space: nowrap;
   text-decoration: none;
   display: inline-block;
+  position: relative;
 }
 
 .nav-links li a:hover {
@@ -69,10 +101,123 @@
 
 .nav-links li a.active {
   color: var(--teal-lt);
-  border-bottom-color: var(--teal-lt);
 }
 
-/* ─── Auth section (Register / Login / User greeting) ─── */
+/* ── Sliding pill indicator ── */
+.nav-pill {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 3px;
+  background: var(--teal);
+  border-radius: 3px;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   TOOLS DROPDOWN (Tablet only: 769px - 1100px)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.nav-tools-wrapper {
+  position: relative;
+  display: none;  /* Hidden by default, shown on tablet via media query */
+}
+
+.nav-tools-trigger {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #6a7a72;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: 'DM Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 0;
+  transition: color 0.2s;
+}
+
+.nav-tools-trigger:hover {
+  color: var(--cream);
+}
+
+.nav-tools-trigger.active {
+  color: var(--teal-lt);
+}
+
+.nav-tools-arrow {
+  font-size: 8px;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.nav-tools-arrow.open {
+  transform: rotate(180deg);
+}
+
+.nav-tools-dropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 6px;
+  min-width: 180px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.15);
+  animation: dropdownFadeIn 0.18s ease;
+  z-index: 300;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.nav-tools-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.nav-tools-item:hover {
+  background: rgba(108, 189, 181, 0.08);
+}
+
+.nav-tools-item.active {
+  color: var(--teal);
+  background: rgba(108, 189, 181, 0.1);
+}
+
+.nav-tools-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+/* By default show all nav-full-link items (wide desktop) */
+.nav-full-link {
+  display: list-item;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   AUTH SECTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
 .nav-auth {
   display: flex;
   align-items: center;
@@ -80,19 +225,37 @@
   flex-shrink: 0;
 }
 
-.nav-user-greeting {
-  font-size: 10px;
-  letter-spacing: 1px;
-  color: var(--teal-lt);
-  white-space: nowrap;
+/* ── Avatar (authenticated) ── */
+.nav-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+  color: var(--dark);
+  font-family: 'DM Serif Display', serif;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(108, 189, 181, 0.3);
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0;
 }
 
-.btn-register,
-.btn-login {
+.nav-avatar:hover {
+  border-color: var(--teal-lt);
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(108, 189, 181, 0.3);
+}
+
+/* ── Ingresar button (unauthenticated) ── */
+.btn-ingresar {
   font-size: 9px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  padding: 6px 14px;
+  padding: 7px 18px;
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s;
@@ -100,65 +263,333 @@
   white-space: nowrap;
   text-decoration: none;
   display: inline-block;
-}
-
-.btn-register {
-  background: transparent;
-  border: 1px solid rgba(108, 189, 181, 0.4);
-  color: var(--teal-lt);
-}
-
-.btn-register:hover {
-  background: rgba(108, 189, 181, 0.1);
-  border-color: var(--teal-lt);
-}
-
-.btn-login {
   background: var(--teal);
   border: 1px solid var(--teal);
   color: var(--dark);
 }
 
-.btn-login:hover {
+.btn-ingresar:hover {
   background: var(--teal-lt);
   border-color: var(--teal-lt);
 }
 
-/* ─── RESPONSIVE ─── */
+/* ═══════════════════════════════════════════════════════════════════════════════
+   HAMBURGER BUTTON (Mobile only)
+   ═══════════════════════════════════════════════════════════════════════════════ */
 
-@media (max-width: 768px) {
+.nav-hamburger {
+  display: none;  /* Shown via media query */
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-hamburger:hover {
+  background: rgba(108, 189, 181, 0.1);
+}
+
+.hamburger-line {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--cream);
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-origin: center;
+}
+
+/* ── Hamburger → X animation ── */
+.nav-hamburger.open .hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-hamburger.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav-hamburger.open .hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   OVERLAY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 250;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.nav-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   MOBILE DRAWER
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--surface);
+  z-index: 300;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+/* ── Drawer header ── */
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.drawer-title {
+  font-size: 9px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.drawer-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.drawer-close:hover {
+  color: var(--text);
+  background: rgba(108, 189, 181, 0.08);
+}
+
+/* ── Drawer links ── */
+.drawer-links {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.drawer-link:hover {
+  background: rgba(108, 189, 181, 0.06);
+}
+
+.drawer-link.active {
+  background: rgba(108, 189, 181, 0.1);
+  color: var(--teal);
+}
+
+.drawer-icon {
+  font-size: 18px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.drawer-label {
+  letter-spacing: 0.5px;
+}
+
+.drawer-link.active .drawer-label {
+  font-weight: 500;
+}
+
+/* ── Drawer divider ── */
+.drawer-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 24px;
+}
+
+/* ── Drawer auth ── */
+.drawer-auth {
+  padding: 16px 24px 24px;
+}
+
+.drawer-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.drawer-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+  color: var(--dark);
+  font-family: 'DM Serif Display', serif;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-user-name {
+  font-size: 12px;
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+}
+
+.drawer-logout {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid rgba(200, 100, 100, 0.3);
+  border-radius: 8px;
+  background: rgba(200, 100, 100, 0.06);
+  color: #c06050;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.drawer-logout:hover {
+  background: rgba(200, 100, 100, 0.12);
+  border-color: rgba(200, 100, 100, 0.5);
+}
+
+.drawer-auth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer-btn {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-family: 'DM Mono', monospace;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.drawer-btn--login {
+  background: var(--teal);
+  color: var(--dark);
+  border: 1px solid var(--teal);
+}
+
+.drawer-btn--login:hover {
+  background: var(--teal-lt);
+}
+
+.drawer-btn--register {
+  background: transparent;
+  color: var(--teal);
+  border: 1px solid rgba(108, 189, 181, 0.4);
+}
+
+.drawer-btn--register:hover {
+  background: rgba(108, 189, 181, 0.08);
+  border-color: var(--teal);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tablet: show tools dropdown, hide full links ── */
+@media (max-width: 1100px) and (min-width: 769px) {
   .nav {
-    padding: 0 28px;
-    height: 56px;
-    gap: 16px;
-  }
-
-  .nav-logo {
-    font-size: 16px;
+    padding: 0 32px;
   }
 
   .nav-links {
     gap: 20px;
   }
 
-  .nav-links li a {
-    font-size: 9px;
-    letter-spacing: 2px;
-    padding: 3px 0;
+  .nav-tools-wrapper {
+    display: list-item;
+  }
+
+  .nav-full-link {
+    display: none;
+  }
+}
+
+/* ── Mobile: hide desktop nav, show hamburger ── */
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 20px;
+    height: 56px;
+  }
+
+  .nav--scrolled {
+    height: 48px;
+  }
+
+  .nav-links-wrap {
+    display: none;
   }
 
   .nav-auth {
-    gap: 8px;
+    display: none;
   }
 
-  .btn-register,
-  .btn-login {
-    font-size: 8px;
-    padding: 5px 10px;
+  .nav-hamburger {
+    display: flex;
   }
 
-  .nav-user-greeting {
-    font-size: 9px;
+  .nav-logo {
+    font-size: 16px;
   }
 }
 
@@ -166,7 +597,10 @@
   .nav {
     padding: 0 16px;
     height: 52px;
-    gap: 12px;
+  }
+
+  .nav--scrolled {
+    height: 44px;
   }
 
   .nav-logo {
@@ -174,28 +608,7 @@
     letter-spacing: 0.5px;
   }
 
-  .nav-links {
-    gap: 12px;
-  }
-
-  .nav-links li a {
-    font-size: 7px;
-    letter-spacing: 1.5px;
-    padding: 2px 0;
-    border-bottom-width: 1px;
-  }
-
-  .nav-auth {
-    gap: 6px;
-  }
-
-  .btn-register,
-  .btn-login {
-    font-size: 7px;
-    padding: 4px 8px;
-  }
-
-  .nav-user-greeting {
-    display: none;
+  .nav-drawer {
+    width: 100%;
   }
 }

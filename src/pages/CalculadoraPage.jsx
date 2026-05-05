@@ -1,0 +1,210 @@
+import React, { useState, useEffect, useCallback } from "react";
+import { useMathEngine } from "../hooks/useMathEngine";
+import { MathResult, MathInput, OperationSelector, MathRenderer } from "../components/MathComponents";
+
+const EXAMPLE_EXPRESSIONS = {
+  derive:    ["x^3 - 2*x + 1", "sin(x)*cos(x)", "exp(x)*x^2", "ln(x)/x"],
+  integrate: ["x^2", "sin(x)", "1/(1+x^2)", "exp(-x)"],
+  simplify:  ["(x^2 - 1)/(x - 1)", "sin(x)^2 + cos(x)^2", "(a+b)^2 - a^2 - 2*a*b"],
+  factorize: ["x^2 - 4", "x^3 - 8", "x^2 + 5*x + 6", "x^4 - 1"],
+  solve:     ["x^2 - 4 = 0", "x^2 + 2*x - 3 = 0", "sin(x) = 0", "exp(x) = 1"],
+};
+
+export function CalculadoraPage() {
+  const { derive, integrate, simplify, factorize, solve, validate, checkHealth, loading, error, clearError } = useMathEngine();
+
+  const [operation, setOperation] = useState("derive");
+  const [expression, setExpression] = useState("");
+  const [variable, setVariable] = useState("x");
+  const [lowerBound, setLowerBound] = useState("");
+  const [upperBound, setUpperBound] = useState("");
+  const [result, setResult] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [serverUp, setServerUp] = useState(null);
+
+  // Health check on mount
+  useEffect(() => {
+    checkHealth().then(setServerUp);
+    const interval = setInterval(() => checkHealth().then(setServerUp), 30000);
+    return () => clearInterval(interval);
+  }, [checkHealth]);
+
+  // Clear result on operation change
+  useEffect(() => { setResult(null); clearError(); }, [operation]);
+
+  const handleCalculate = useCallback(async () => {
+    if (!expression.trim()) return;
+    clearError();
+    try {
+      let res;
+      switch (operation) {
+        case "derive":    res = await derive(expression, variable); break;
+        case "integrate": res = await integrate(expression, variable, lowerBound || null, upperBound || null); break;
+        case "simplify":  res = await simplify(expression, variable); break;
+        case "factorize": res = await factorize(expression, variable); break;
+        case "solve":     res = await solve(expression, variable); break;
+        default: return;
+      }
+      if (res) {
+        setResult(res);
+        setHistory(prev => [{ ...res, timestamp: Date.now(), input: expression }, ...prev].slice(0, 10));
+      }
+    } catch { /* error already set by hook */ }
+  }, [operation, expression, variable, lowerBound, upperBound, derive, integrate, simplify, factorize, solve, clearError]);
+
+  const handleKeyDown = (e) => { if (e.key === "Enter" && !loading) handleCalculate(); };
+
+  const handleExample = (ex) => {
+    setExpression(ex);
+    setResult(null);
+    clearError();
+  };
+
+  return (
+    <div className="solver calculadora-page fade-up" id="calculadora-page">
+      {/* Header */}
+      <header className="page-header fade-up">
+        <p className="page-eyebrow">Motor Simbólico</p>
+        <h1 className="page-title">Calculadora <em>Simbólica</em></h1>
+      </header>
+
+      {/* Status */}
+      <div className={`calc-status ${serverUp === true ? "calc-status--ok" : serverUp === false ? "calc-status--off" : "calc-status--loading"}`} id="server-status">
+        <span className="calc-status-dot" />
+        <span className="calc-status-text">
+          {serverUp === true ? "Motor conectado" : serverUp === false ? "Motor desconectado" : "Verificando..."}
+        </span>
+      </div>
+
+      {/* Operation tabs */}
+      <OperationSelector selected={operation} onSelect={setOperation} />
+
+      {/* Main grid */}
+      <div className="solver-grid fade-up-2">
+        {/* ─── Left panel: Input ─── */}
+        <div className="panel" id="input-panel">
+          <div className="panel-header">
+            <span className="panel-title">Entrada</span>
+          </div>
+          <div className="panel-body">
+            <MathInput
+              value={expression}
+              onChange={setExpression}
+              onValidate={validate}
+              label={operation === "solve" ? "Ecuación" : "Expresión"}
+              placeholder={EXAMPLE_EXPRESSIONS[operation]?.[0] || "x^2 + 3*x"}
+              id="calc-expression-input"
+            />
+
+            {/* Variable */}
+            <div className="field">
+              <label htmlFor="calc-variable">Variable</label>
+              <input id="calc-variable" type="text" value={variable} onChange={e => setVariable(e.target.value || "x")}
+                placeholder="x" maxLength={3} onKeyDown={handleKeyDown} />
+            </div>
+
+            {/* Bounds for integration */}
+            {operation === "integrate" && (
+              <div className="calc-bounds fade-up">
+                <div className="divider"><span>Límites (opcional)</span></div>
+                <div className="field-row">
+                  <div className="field">
+                    <label htmlFor="calc-lower">Inferior</label>
+                    <input id="calc-lower" type="text" value={lowerBound} onChange={e => setLowerBound(e.target.value)}
+                      placeholder="0" onKeyDown={handleKeyDown} />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="calc-upper">Superior</label>
+                    <input id="calc-upper" type="text" value={upperBound} onChange={e => setUpperBound(e.target.value)}
+                      placeholder="1" onKeyDown={handleKeyDown} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Calculate button */}
+            <button className="calc-submit" onClick={handleCalculate} disabled={loading || !expression.trim()} id="calc-submit-btn"
+              onKeyDown={handleKeyDown}>
+              {loading ? (
+                <><span className="calc-spinner" /> Calculando...</>
+              ) : (
+                "Calcular"
+              )}
+            </button>
+
+            {/* Error */}
+            {error && <div className="solver-error fade-up" id="calc-error">{error}</div>}
+
+            {/* Examples */}
+            <div className="calc-examples">
+              <span className="calc-examples-label">Ejemplos</span>
+              <div className="calc-examples-list">
+                {(EXAMPLE_EXPRESSIONS[operation] || []).map((ex, i) => (
+                  <button key={i} className="calc-example-chip" onClick={() => handleExample(ex)} id={`example-${operation}-${i}`}>
+                    {ex}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ─── Right panel: Result ─── */}
+        <div className="panel" id="result-panel">
+          <div className="panel-header">
+            <span className="panel-title">Resultado</span>
+            {result?.cached && <span className="calc-cache-badge">⚡ desde cache</span>}
+          </div>
+          <div className="panel-body">
+            {result ? (
+              <MathResult result={result} />
+            ) : (
+              <div className="result-placeholder">
+                <span style={{ fontSize: 32, opacity: 0.3 }}>∑</span>
+                <p>Ingresá una expresión y presioná Calcular</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* History */}
+      {history.length > 0 && (
+        <div className="calc-history panel fade-up-3" id="history-panel">
+          <div className="panel-header">
+            <span className="panel-title">Historial reciente</span>
+            <button className="calc-history-clear" onClick={() => setHistory([])}>Limpiar</button>
+          </div>
+          <div className="panel-body">
+            <div className="calc-history-list">
+              {history.map((item, i) => (
+                <button key={i} className="calc-history-item" onClick={() => { setExpression(item.input); setOperation(item.operation); setResult(item); }}
+                  id={`history-item-${i}`}>
+                  <span className="calc-history-op">{item.operation}</span>
+                  <span className="calc-history-expr">{item.input}</span>
+                  <span className="calc-history-arrow">→</span>
+                  <span className="calc-history-res">{item.operation === "solve" ? `${item.count} sol.` : item.plain}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reference */}
+      <div className="calc-reference panel fade-up-3" id="reference-panel">
+        <div className="panel-header"><span className="panel-title">Referencia rápida</span></div>
+        <div className="panel-body">
+          <div className="calc-ref-grid">
+            <div className="calc-ref-item"><code>^</code> <span>Potencia</span> <MathRenderer latex="x^2" /></div>
+            <div className="calc-ref-item"><code>sqrt()</code> <span>Raíz</span> <MathRenderer latex="\sqrt{x}" /></div>
+            <div className="calc-ref-item"><code>sin() cos() tan()</code> <span>Trig.</span> <MathRenderer latex="\sin(x)" /></div>
+            <div className="calc-ref-item"><code>ln() / log()</code> <span>Log.</span> <MathRenderer latex="\ln(x)" /></div>
+            <div className="calc-ref-item"><code>exp()</code> <span>Exp.</span> <MathRenderer latex="e^x" /></div>
+            <div className="calc-ref-item"><code>pi, e</code> <span>Const.</span> <MathRenderer latex="\pi,\; e" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

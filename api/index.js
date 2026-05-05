@@ -3,25 +3,41 @@ import express from 'express';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import helmet from 'helmet';
-import { query } from './src/config/db.js';
-import { generateToken, authMiddleware } from './src/middleware/auth.js';
-import { generateExplanation, checkRateLimit, chatWithIka } from './src/services/ai.js';
+import { query } from '../src/config/db.js';
+import { generateToken, authMiddleware } from '../src/middleware/auth.js';
+import { generateExplanation, checkRateLimit, chatWithIka } from '../src/services/ai.js';
 
 const app = express();
 
-app.use(helmet());
-
 // --- MIDDLEWARES ---
 
-// 1. Lectura de JSON
-app.use(express.json()); 
-
-// 2. Configuración de CORS
-app.use(cors({
-    origin: ['https://numerika-ai.vercel.app', 'http://localhost:5173'], 
+// 1. CORS — DEBE ir primero para que OPTIONS preflight funcione
+const corsOptions = {
+    origin: ['https://numerika-ai.vercel.app', 'http://localhost:5173'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+};
+app.use(cors(corsOptions));
+
+// Preflight manual: responder OPTIONS en cualquier ruta (Express 5 compatible)
+app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+        res.status(204).end();
+        return;
+    }
+    next();
+});
+
+// 2. Seguridad — desactivar las políticas que interfieren con CORS
+app.use(helmet({
+    crossOriginResourcePolicy: false,
+    crossOriginOpenerPolicy: false,
+    crossOriginEmbedderPolicy: false,
 }));
+
+// 3. Lectura de JSON
+app.use(express.json());
 
 // --- RUTAS PÚBLICAS ---
 
@@ -263,6 +279,10 @@ app.post('/api/ai/chat', authMiddleware, async (req, res) => {
 
 const PORT = process.env.PORT || 3000; 
 
-app.listen(PORT, () => {
-    console.log(`🚀 Servidor de NumerikaAI encendido en el puerto: ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`🚀 Servidor de NumerikaAI encendido en el puerto: ${PORT}`);
+    });
+}
+
+export default app;

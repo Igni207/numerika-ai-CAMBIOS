@@ -199,6 +199,7 @@ export const NAV_ITEMS = [
   ["comparar", "Comparar"],
   ["metodos", "Métodos"],
   ["amn", "Aplicaciones"],
+  ["calculadora", "Calculadora"],
   // ["docs", "Docs"],
 ];
 

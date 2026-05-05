@@ -8,6 +8,7 @@ import { Amn } from "./pages/Amn";
 // import { Documentacion } from "./pages/Documentacion"; // Ruta deshabilitada
 import { RegisterPage } from "./pages/RegisterPage";
 import { LoginPage } from "./pages/LoginPage";
+import { CalculadoraPage } from "./pages/CalculadoraPage";
 import { useAuth } from "./context/AuthContext";
 import { IkaWidget } from "./components/IkaWidget";
 import { Footer } from "./components/Footer";
@@ -25,6 +26,7 @@ import "./styles/footer.css";
 import "./styles/auth.css";
 import "./styles/ika.css";
 import "./styles/friendly-errors.css";
+import "./styles/calculadora.css";
 
 export default function NumerikaApp() {
   const { loading } = useAuth();
@@ -68,6 +70,8 @@ export default function NumerikaApp() {
 
           <Route path="/aplicaciones" element={<Amn />} />
           <Route path="/aplicaciones/:appId" element={<Amn />} />
+
+          <Route path="/calculadora" element={<CalculadoraPage />} />
 
           {/* <Route path="/docs" element={<Documentacion />} /> */}
 
