@@ -42,7 +42,7 @@ export function CalculadoraPage() {
   const [history,     setHistory]     = useState([]);
   const [serverUp,    setServerUp]    = useState(null);
 
-
+  // MODELO EDO
   const [edoSubTab, setEdoSubTab] = useState("orden_superior");
 
   // Health check on mount
@@ -66,12 +66,13 @@ export function CalculadoraPage() {
         case "simplify":  res = await simplify(expression, variable); break;
         case "factorize": res = await factorize(expression, variable); break;
         case "solve":     res = await solve(expression, variable); break;
+        case "edo":       res = null; break;
         default: return;
       }
       if (res) {
         setResult(res);
         setHistory(prev =>
-          [{ ...res, timestamp: Date.now(), input: expression }, ...prev].slice(0, 10)
+          [{ ...res, timestamp: Date.now(), input: expression, operation }, ...prev].slice(0, 10)
         );
       }
     } catch { /* error already set by the hook */ }
@@ -80,7 +81,7 @@ export function CalculadoraPage() {
   const handleKeyDown = (e) => { if (e.key === "Enter" && !loading) handleCalculate(); };
   const handleExample = (ex) => { setExpression(ex); setResult(null); clearError(); };
 
-  // modo EDO
+  // Modo EDO
   const isEdoMode = operation === "edo";
 
   return (
@@ -109,6 +110,7 @@ export function CalculadoraPage() {
 
       <OperationSelector selected={operation} onSelect={setOperation} />
 
+      {/* BOTÓN MODELO EDO - MODIFICADO CON EL NUEVO BOTÓN */}
       <div className="edo-tab-inject">
         <button
           className={`edo-main-tab ${isEdoMode ? "edo-main-tab--active" : ""}`}
@@ -121,7 +123,7 @@ export function CalculadoraPage() {
         </button>
       </div>
 
-      {/* Modo EDO */}
+      {/* MODELO EDO */}
       {isEdoMode && (
         <div className="edo-section fade-up" id="edo-section">
 
@@ -149,6 +151,7 @@ export function CalculadoraPage() {
         </div>
       )}
 
+      {/* MODALIDAD CONVENCIONAL (OPERACIONES BÁSICAS) */}
       {!isEdoMode && (
         <>
           <div className="solver-grid fade-up-2">
