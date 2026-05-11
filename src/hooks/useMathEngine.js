@@ -131,4 +131,25 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
     error,
     clearError: () => setError(null),
   };
+
+  // Resolver EDOs
+  const odeSolve = useCallback(
+    async (equation, ics = []) => {
+      const payload = {
+        equation: equation,
+        initial_conditions: ics
+      };
+      return request("/api/edo", payload);
+    },
+    [request]
+  );
+
+  return {
+    derive, integrate, simplify, factorize, solve,
+    odeSolve,
+    loading, error, clearError,
+  };
+
+
+
 }
