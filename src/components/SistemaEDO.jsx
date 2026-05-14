@@ -30,7 +30,7 @@ export function SistemaEDO() {
         clearError();
     };
 
-    // Handlers para el historial (se llamarán desde el padre)
+    // Para el historial
     const addToHistory = (input, output) => {
         // Lógica de historial externa
     };
