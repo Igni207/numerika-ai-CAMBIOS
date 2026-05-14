@@ -17,7 +17,7 @@ export function EDOOrdenSuperior() {
         clearError();
         if (!loading) {
             try {
-                // Payload: ics mapeado a { derivative, at, value }
+                // Payload
                 const icsPayload = ics.filter(ic => ic.v !== "")
                     .map(ic => ({
                         derivative: parseInt(ic.d) || 0,
@@ -40,7 +40,7 @@ export function EDOOrdenSuperior() {
 
     // Handlers para el historial
     const addToHistory = (input, output) => {
-        // Se manejará en CalculadoraPage, esto es solo lógica auxiliar
+        // Se manejará en CalculadoraPage en principio
     };
 
     const reset = () => {
