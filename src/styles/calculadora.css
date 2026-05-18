@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════════════
-   Calculadora Simbólica — NumérikaAI
+    Calculadora Simbólica — NumérikaAI
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Status bar ─────────────────────────────────────────────────────────────── */
@@ -57,7 +57,7 @@
 
 @keyframes statusPulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
+  50%       { opacity: 0.3; }
 }
 
 /* ─── Operation tabs ─────────────────────────────────────────────────────────── */
@@ -102,6 +102,691 @@
 .calc-op-label {
   font-size: 11px;
   letter-spacing: 0.5px;
+}
+
+/* ─── EDO main tab (inyectado junto a las operaciones) ───────────────────────── */
+.edo-tab-inject {
+  display: inline-flex;
+  margin-bottom: 20px;
+  margin-top: -14px; /* se alinea con .calc-operations */
+}
+
+.edo-main-tab {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--muted);
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.edo-main-tab:hover {
+  border-color: var(--teal-lt);
+  color: var(--text);
+}
+
+.edo-main-tab--active {
+  background: rgba(108, 189, 181, 0.1);
+  border-color: var(--teal);
+  color: var(--teal);
+}
+
+.edo-main-tab-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.edo-main-tab-new {
+  font-size: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--teal);
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+/* ─── EDO section wrapper ────────────────────────────────────────────────────── */
+.edo-section {
+  width: 100%;
+}
+
+/* ─── EDO subtabs ────────────────────────────────────────────────────────────── */
+.edo-subtabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.edo-subtab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  min-width: 160px;
+}
+
+.edo-subtab:hover {
+  border-color: var(--teal-lt);
+}
+
+.edo-subtab--active {
+  background: rgba(108, 189, 181, 0.08);
+  border-color: var(--teal);
+}
+
+.edo-subtab-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.edo-subtab--active .edo-subtab-label {
+  color: var(--teal);
+}
+
+.edo-subtab-tag {
+  font-size: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--teal);
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.edo-subtab-desc {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.3px;
+}
+
+.edo-subtab-content {
+  width: 100%;
+}
+
+/* ─── EDO panel ──────────────────────────────────────────────────────────────── */
+.edo-panel {
+  width: 100%;
+}
+
+/* ─── EDO solver grid (mismo patrón que solver-grid del proyecto) ────────────── */
+.edo-solver-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+/* ─── EDO ejemplos rápidos ───────────────────────────────────────────────────── */
+.edo-examples {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.edo-examples-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  font-family: 'DM Mono', monospace;
+}
+
+.edo-examples-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ─── EDO input fields ───────────────────────────────────────────────────────── */
+.edo-eq-input {
+  font-family: 'DM Mono', 'Fira Mono', monospace;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+}
+
+.edo-textarea {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 13px;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 90px;
+  line-height: 1.6;
+}
+
+.edo-textarea:focus {
+  border-color: var(--teal);
+}
+
+.field-hint {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 5px;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+}
+
+/* ─── Condiciones iniciales ──────────────────────────────────────────────────── */
+.ic-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.ic-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ic-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.ic-at-input {
+  width: 36px !important;
+  text-align: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  padding: 3px 4px !important;
+  display: inline-block;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ic-at-input:focus {
+  border-color: var(--teal);
+}
+
+.ic-value-input {
+  width: 72px !important;
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ic-value-input:focus {
+  border-color: var(--teal);
+}
+
+.ic-order-select {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ic-order-select:focus {
+  border-color: var(--teal);
+}
+
+.ic-remove-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px 7px;
+  border-radius: 5px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.ic-remove-btn:hover {
+  color: #c41e3a;
+  background: rgba(196, 30, 58, 0.07);
+}
+
+.ic-add-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--teal);
+  background: none;
+  border: 1px dashed rgba(108, 189, 181, 0.4);
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  margin-top: 2px;
+}
+
+.ic-add-btn:hover {
+  background: rgba(108, 189, 181, 0.07);
+  border-color: var(--teal);
+}
+
+/* ─── Sistema EDO: grid de ICs dinámicas ─────────────────────────────────────── */
+.sistema-ics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+  margin-bottom: 10px;
+}
+
+.sistema-ic-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── EDO action buttons ─────────────────────────────────────────────────────── */
+.edo-btn {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  border-radius: 8px;
+  padding: 10px 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid;
+}
+
+.edo-btn.primary {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #fff;
+}
+
+.edo-btn.primary:hover:not(:disabled) {
+  background: #5aada5;
+  border-color: #5aada5;
+}
+
+.edo-btn.primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.edo-btn.secondary {
+  background: none;
+  border-color: var(--border);
+  color: var(--muted);
+  width: 100%;
+}
+
+.edo-btn.secondary:hover {
+  border-color: var(--teal-lt);
+  color: var(--text);
+}
+
+/* ─── Referencia de sintaxis EDO (colapsable) ────────────────────────────────── */
+.syntax-toggle {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: none;
+  border: 1px solid rgba(108, 189, 181, 0.3);
+  border-radius: 5px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.syntax-toggle:hover {
+  background: rgba(108, 189, 181, 0.07);
+  border-color: var(--teal);
+}
+
+.edo-syntax-ref {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.edo-syntax-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.edo-syntax-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.edo-syntax-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.edo-syntax-item code {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--teal);
+  white-space: nowrap;
+}
+
+.edo-syntax-item span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+/* ─── EDO resultado ──────────────────────────────────────────────────────────── */
+.edo-result {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.edo-result-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edo-result-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.edo-result-eq {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 11px;
+  display: block;
+  word-break: break-word;
+}
+
+.edo-result-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.edo-result-block--highlight {
+  border-color: rgba(108, 189, 181, 0.5);
+  background: rgba(108, 189, 181, 0.04);
+}
+
+.edo-result-block-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.edo-result-math {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.edo-result-math code {
+  background: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+.edo-result-math--primary code {
+  color: var(--teal);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.edo-result-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.edo-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  color: var(--text);
+}
+
+.edo-tag-key {
+  color: var(--muted);
+  margin-right: 3px;
+}
+
+.edo-result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  letter-spacing: 0.3px;
+}
+
+.edo-result-meta strong {
+  color: var(--text);
+}
+
+/* ─── Step-by-step accordion (EDO) ──────────────────────────────────────────── */
+/* Reutiliza .stepbystep del proyecto; estos son sobrescritos / complementarios */
+.edo-panel .stepbystep {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.edo-panel .stepbystep-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--text);
+  transition: background 0.15s;
+}
+
+.edo-panel .stepbystep-toggle:hover {
+  background: rgba(108, 189, 181, 0.05);
+}
+
+.edo-panel .stepbystep-toggle-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edo-panel .stepbystep-arrow {
+  color: var(--teal);
+  font-size: 12px;
+}
+
+.edo-panel .stepbystep-badge {
+  font-size: 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--teal);
+  padding: 2px 8px;
+  border: 1px solid rgba(108, 189, 181, 0.3);
+  border-radius: 10px;
+}
+
+.edo-panel .stepbystep-body {
+  padding: 14px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.edo-panel .stepbystep-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edo-panel .stepbystep-list li {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* ─── Friendly Error Box ─────────────────────────────────────────────────────── */
+.friendly-error-box {
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friendly-error-box--warning {
+  background: rgba(200, 168, 64, 0.07);
+  border: 1px solid rgba(200, 168, 64, 0.3);
+}
+
+.friendly-error-box--error {
+  background: rgba(196, 30, 58, 0.05);
+  border: 1px solid rgba(196, 30, 58, 0.2);
+}
+
+.friendly-error-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.friendly-error-box--warning .friendly-error-title { color: #9a7a2a; }
+.friendly-error-box--error   .friendly-error-title { color: #c41e3a; }
+
+.friendly-error-msg {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0;
+}
+
+.friendly-error-tip {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.friendly-error-details {
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.friendly-error-details summary {
+  user-select: none;
+  letter-spacing: 0.3px;
+}
+
+.friendly-error-details code {
+  display: block;
+  margin-top: 7px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  word-break: break-all;
+  white-space: pre-wrap;
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 /* ─── Submit button ──────────────────────────────────────────────────────────── */
@@ -550,10 +1235,57 @@
   .calc-history-res {
     max-width: 80px;
   }
+
+  /* EDO responsive */
+  .edo-solver-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edo-subtabs {
+    gap: 6px;
+  }
+
+  .edo-subtab {
+    min-width: 130px;
+    padding: 10px 14px;
+  }
+
+  .edo-subtab-desc {
+    display: none;
+  }
+
+  .edo-syntax-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sistema-ics-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ic-row {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 480px) {
   .calc-ref-grid {
     grid-template-columns: 1fr;
+  }
+
+  .edo-subtabs {
+    flex-direction: column;
+  }
+
+  .edo-subtab {
+    width: 100%;
+  }
+
+  .sistema-ics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .edo-examples {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
