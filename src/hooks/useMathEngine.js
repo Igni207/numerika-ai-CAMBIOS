@@ -1,13 +1,3 @@
-/**
- * useMathEngine — Custom hook para comunicarse con el Motor Matemático de NumérikaAI.
- *
- * Uso:
- *   const { derive, integrate, simplify, factorize, solve, validate, loading, error } = useMathEngine();
- *
- *   const result = await derive("x^3 - 2*x", "x");
- *   console.log(result.latex);  // "3 x^{2} - 2"
- */
-
 import { useState, useCallback, useRef } from "react";
 
 const DEFAULT_URL =
@@ -18,14 +8,12 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
   const [error, setError] = useState(null);
   const controllerRef = useRef(null);
 
-  // ── Fetch genérico ──────────────────────────────────────────────────────
+  // ── Fetch genérico ──────────────────────────────────────────────────────────
   const request = useCallback(
     async (endpoint, body) => {
-      // Cancelar request anterior si hay uno en curso
       if (controllerRef.current) {
         controllerRef.current.abort();
       }
-
       const controller = new AbortController();
       controllerRef.current = controller;
 
@@ -42,23 +30,17 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
 
         if (!res.ok) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(
-            data.detail || `Error del servidor (${res.status})`
-          );
+          throw new Error(data.detail || `Error del servidor (${res.status})`);
         }
 
         const data = await res.json();
         return data;
       } catch (err) {
         if (err.name === "AbortError") return null;
-
         const msg =
           err.message === "Failed to fetch"
-            ? "No se pudo conectar con el motor matemático. ¿Está corriendo en " +
-              baseUrl +
-              "?"
+            ? "No se pudo conectar con el motor matemático."
             : err.message;
-
         setError(msg);
         throw new Error(msg);
       } finally {
@@ -69,8 +51,7 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
     [baseUrl]
   );
 
-  // ── Operaciones ─────────────────────────────────────────────────────────
-
+  // ── Funciones Básicas ──────────────────────────────────────────────────────
   const derive = useCallback(
     (expression, variable = "x") =>
       request("/api/math/derive", { expression, variable }),
@@ -78,7 +59,7 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
   );
 
   const integrate = useCallback(
-    (expression, variable = "x", lower = null, upper = null) =>
+    (expression, variable = "x", lower, upper) =>
       request("/api/math/integrate", { expression, variable, lower, upper }),
     [request]
   );
@@ -101,55 +82,68 @@ export function useMathEngine(baseUrl = DEFAULT_URL) {
     [request]
   );
 
-  const validate = useCallback(
-    (expression) =>
-      request("/api/math/validate", { expression }),
+  // ── Funciones EDO ──────────────────────────────────────────────────────────
+
+  /**
+   * odeSolve — Resuelve una EDO escalar de orden arbitrario.
+   * @param {string} equation  — ej: "y'' + y = 0"
+   * @param {Array}  ics       — [{ d: "0", at: "0", v: "1" }, ...]
+   */
+  const odeSolve = useCallback(
+    async (equation, ics = []) => {
+      const payload = {
+        equation,
+        initial_conditions: ics.map(ic => ({
+          derivative: parseInt(ic.d) || 0,
+          at: ic.at ?? "0",
+          value: ic.v ?? "0",
+        })),
+      };
+      return request("/api/ode/solve", payload);
+    },
     [request]
   );
 
-  // ── Health check (GET) ──────────────────────────────────────────────────
+  /**
+   * Resuelve un sistema de EDOs de primer orden.
+   * @param {string[]} equations — ["x' = y", "y' = -x"]
+   * @param {Object}   ics       — { x: "1", y: "0" }
+   */
+  const odeSystem = useCallback(
+    async (equations, ics) => {
+      const payload = {
+        equations,
+        initial_conditions: ics,
+      };
+      return request("/api/ode/system", payload);
+    },
+    [request]
+  );
+
+  // ── Utils ──────────────────────────────────────────────────────────────────
   const checkHealth = useCallback(async () => {
     try {
       const res = await fetch(`${baseUrl}/health`);
-      if (!res.ok) return false;
-      const data = await res.json();
-      return data.status === "healthy";
+      return res.ok;
     } catch {
       return false;
     }
   }, [baseUrl]);
 
   return {
+    // Básicas
     derive,
     integrate,
     simplify,
     factorize,
     solve,
-    validate,
-    checkHealth,
+    // EDOs
+    odeSolve,
+    odeSystem,
+    // Estado & Utils
     loading,
     error,
     clearError: () => setError(null),
+    checkHealth,
   };
-
-  // Resolver EDOs
-  const odeSolve = useCallback(
-    async (equation, ics = []) => {
-      const payload = {
-        equation: equation,
-        initial_conditions: ics
-      };
-      return request("/api/edo", payload);
-    },
-    [request]
-  );
-
-  return {
-    derive, integrate, simplify, factorize, solve,
-    odeSolve,
-    loading, error, clearError,
-  };
-
-
-
 }
