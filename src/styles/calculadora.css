@@ -651,8 +651,6 @@
   color: var(--text);
 }
 
-/* ─── Step-by-step accordion (EDO) ──────────────────────────────────────────── */
-/* Reutiliza .stepbystep del proyecto; estos son sobrescritos / complementarios */
 .edo-panel .stepbystep {
   border: 1px solid var(--border);
   border-radius: 10px;
